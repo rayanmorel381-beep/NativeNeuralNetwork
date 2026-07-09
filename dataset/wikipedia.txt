@@ -1,0 +1,235 @@
+
+La programmation informatique désigne l’ensemble des activités liées à la conception, l’écriture, le test et la maintenance de programmes informatiques à l’aide de langages de programmation. Compétence centrale de l’ingénierie contemporaine, elle intervient dans le développement de logiciels, d’applications, de systèmes d’exploitation et de dispositifs numériques au cœur de tous les secteurs de la société.
+L'écriture d'un programme se fait dans un langage de programmation. Un logiciel est un ensemble de programmes (qui peuvent être écrits dans des langages de programmation différents) destiné à la réalisation de certaines tâches par un (ou plusieurs) utilisateurs du logiciel.
+La programmation représente donc ici la rédaction du code source d'un logiciel. On utilise plutôt le terme développement pour dénoter l'ensemble des activités liées à la création d'un logiciel et des programmes qui le composent. Cela inclut la spécification du logiciel, sa conception, puis son implémentation proprement dite au sens de l'écriture des programmes dans un langage de programmation bien défini, ainsi que la vérification de sa correction, etc.
+Longtemps perçue comme un simple instrument technique, la programmation est désormais reconnue comme une pratique culturellement et socialement signifiante. Elle façonne nos usages numériques, nos modes de communication et jusqu’à nos structures sociales et économiques. Des chercheurs comme Lev Manovich ou Shoshana Zuboff ont mis en lumière le rôle structurant du logiciel dans notre culture numérique contemporaine et les rapports de pouvoir qui en émergent.
+La programmation n’est pas neutre : elle implique des choix techniques et éthiques pouvant renforcer ou atténuer des biais algorithmiques, comme l’ont montré Joy Buolamwini et Timnit Gebru dans l’étude Gender Shades. Elle est aussi au cœur des débats sur l’inclusion dans les métiers du numérique, documentés notamment par Mar Hicks ou Janet Abbate.
+Enfin, elle s’inscrit dans des dynamiques sociales vivantes : communautés open source, plateformes coopératives comme GitHub, ou initiatives éducatives visant à démocratiser l’apprentissage du code. L’anthropologue Gabriella Coleman y voit une éthique du partage et de la liberté façonnée par les développeurs eux-mêmes.
+
+
+Histoire
+
+La première machine programmable (c’est-à-dire machine dont les possibilités changent quand on modifie son programme) est probablement le métier à tisser de Jacquard, qui a été réalisé en 1801. La machine utilisait une suite de cartons perforés. Les trous indiquaient le motif que le métier suivait pour réaliser un tissage ; avec des cartes différentes le métier produisait des tissages différents. Cette innovation a été ensuite améliorée par Herman Hollerith d'IBM pour le développement de la fameuse carte perforée d'IBM.
+En 1937, la publication de l'article fondateur de la science informatique On Computable Numbers with an Application to the Entscheidungsproblem par Alan Turing allait donner le coup d'envoi à la création de l'ordinateur programmable. Il y présente sa machine de Turing, le premier calculateur universel programmable, et invente les concepts et les termes de programmation et de programme.
+Les premiers programmes d'ordinateur étaient réalisés avec un fer à souder et un grand nombre de tubes à vide (plus tard, des transistors). Les programmes devenant plus complexes, cela est devenu presque impossible, parce qu'une seule erreur rendait le programme entier inutilisable. Avec les progrès des supports de données, il devint possible de charger le programme à partir de cartes perforées, contenant la liste des instructions en code binaire spécifique à un type d'ordinateur particulier. La puissance des ordinateurs augmentant, on les utilisa pour faire les programmes, les programmeurs préférant naturellement rédiger du texte plutôt que des suites de 0 et de 1, à charge pour l'ordinateur d'en faire la traduction lui-même.
+Les origines de la programmation informatique remontent bien avant l’ère contemporaine des algorithmes. Le premier algorithme qui fut écrit pour une machine a été écrit par Ada Lovelace en 1843 pour la machine analytique de Charles Babbage. Elle est aujourd’hui considérée comme la première programmeuse de l’histoire.
+Dans le XXe siècle, au cours de la Seconde Guerre mondiale, la programmation prend une forme plus concrète et appliquée. Un des meilleurs exemples est celui des programmeuses de l'ENIAC, un groupe composé de six femmes qui furent chargées de la programmation du premier ordinateur électronique à usage général. Alors que leur rôle a été longtemps négligé, des études telles que celles de Janet Abbate ou de Mar Hicks ont permis de redécouvrir le rôle moteur joué par les femmes dans les origines de l'informatique.
+Jusque dans les années 1960, la programmation était généralement considérée comme une activité administrative ou secondaire, dominée par les femmes. À mesure que la programmation gagnait en prestige, les femmes en ont été progressivement écartées. Mar Hicks montre comment, au Royaume-Uni, la profession a été délibérément masculinisée, écartant les femmes au profit d'une vision technocratique et élitiste de l'informatique.
+Les années 1970 et 1980 ont vu l'émergence des premiers langages structurés (tels que C ou Pascal) et de paradigmes de programmation tels que la programmation orientée objet. Cette période marque aussi l’essor des communs numériques, avec le début du mouvement open source, qui deviendra central dans les années 1990. Le travail de Christopher Kelty et Gabriella Coleman met en lumière l'importance socioculturelle des communautés de développeurs dans cette période de transition.
+Avec le temps, de nouveaux langages de programmation sont apparus, faisant de plus en plus abstraction du matériel sur lequel devraient tourner les programmes. Ceci apporte plusieurs facteurs de gain : ces langages sont plus faciles à apprendre, un programmeur peut produire du code plus rapidement, et les programmes produits peuvent tourner sur différents types de machines.
+Enfin, à partir des années 2010, les réflexions éthiques sur les algorithmes et l'intelligence artificielle sont devenues centrales. Des chercheuses comme Joy Buolamwini et Timnit Gebru ont démontré, dans l'étude Gender Shades, que certains systèmes d'IA présentaient des biais importants envers les femmes et les personnes racisées. Cette conscience a représenté un nouveau repère dans l'histoire de la programmation : celui de la responsabilisation des codeurs et de la prise en compte de l'impact social de leurs œuvres.
+
+
+Différents langages de programmation
+JavaScript
+PHP
+Ruby
+Java
+Swift
+C#, C ou C++
+Python
+Julia
+Scala
+Rust
+
+
+Exemple de programme
+L'immense majorité des programmes qui s'exécutent sur nos ordinateurs, téléphones et autres outils électroniques sont écrits dans des langages de programmation dits impératifs : les lignes du programme sont exécutées les unes après les autres. Chaque ligne du programme effectue soit une opération simple, soit exécute une fonction qui est elle-même une suite d'opérations simples.
+Le programme « Hello World! » est par tradition le premier programme écrit par tout programmeur, censé illustrer la syntaxe du langage de programmation. Le programme a pour unique fonction d'afficher le texte "Hello World!" dans la console ou dans une fenêtre de l'interface graphique.
+Voici une version d'un programme « Hello World! »:
+
+Le programme suivant écrit en langage simplifié et avec des commentaires, demande simplement à l'utilisateur d'entrer au clavier deux nombres entiers, et affiche leur quotient.
+
+Dans ce programme, les principales fonctionnalités de la programmation impérative sont utilisées : des variables de type nombre entier, nombre à virgule, chaîne de caractères, fonction calculant un résultat à partir de paramètres, fonction effectuant une tâche telle qu'afficher un message à l'écran, instruction if permettant d'exécuter un code ou un autre en fonction de la valeur de telle ou telle variable.
+Dans un programme informatique typique, on trouvera suivant les langages des boucles while ou for qui permettent d'exécuter un morceau de code en boucle ou simplement un certain nombre de fois, des new pour l'allocation dynamique de données (par exemple des tableaux), et très souvent des éléments de programmation objet permettant de structurer différemment le code et de créer des types de données personnalisés, ou encore des exceptions pour gérer certains cas d'erreurs plus facilement.
+On remarque que pour effectuer une tâche très simple, le code informatique peut être très laborieux, et encore ici on ne traite pas les erreurs (si l'utilisateur tape un mot au lieu d'un nombre), et l'affichage est minimaliste. C'est pourquoi les langages de programmation n'ont jamais cessé d'évoluer, dans le but d'aider le programmeur qui souhaite réaliser des programmes rapides à s'exécuter, sans dysfonctionnements, et surtout simples à écrire, du moins le plus possible.
+
+
+Développement Logiciel
+Il est aussi focalisé sur le rôle des communautés en ligne (Stack Overflow, Reddit, forums d'utilisateurs spécialisés). Elles favorisent l’entraide, la transmission du savoir et la construction d’une culture professionnelle partagée. Selon Gabriella Coleman, ces communautés bâtissent une éthique propre aux développeurs, centrée sur l'autonomie, la transparence et la création libre.
+Le développement logiciel est également influencé par des enjeux sociaux et culturels. Les pratiques de développement sont souvent le reflet de relations de pouvoir, de normes implicites ou d'exclusions : par exemple, la sous-représentation des femmes et des minorités dans les équipes de développement est un problème structurel, attesté entre autres par Mar Hicks. Des initiatives telles que les programmes de diversité dans la tech ou les projets d'inclusion open source cherchent à diminuer ces écarts.
+
+
+Aspects sociaux et culturels
+Bien que souvent perçue comme une activité purement technique, la programmation informatique s’inscrit dans des dynamiques sociales, culturelles, économiques et politiques complexes. Elle influence la société tout autant qu’elle en est le produit. Plusieurs courants en sciences humaines et sociales, tels que les sciences and technology studies (STS), les humanités numériques ou la sociologie de l’informatique, permettent de mieux comprendre ces dimensions.
+1. Évolution sociale du métier et inclusion
+Historiquement, la programmation a tout d'abord été un travail féminisé, avant d'être à la majorité masculine à partir du moment où son prestige est devenu important. Mar Hicks, décrit la manière selon laquelle les femmes ont lentement été effacées de leur carrière informatique au Royaume-Uni. Janet Abbate, trace également le processus dans l'émergence du rôle des femmes dans l'avènement des premiers programmes aux États-Unis.
+2. Biais éthiques et algorithmiques
+Les logiciels ne sont pas neutres : décisions prises lors de leur conception peuvent entraîner des formes de discrimination. Quelques études, comme Gender Shades, ont démontré que les systèmes faciaux de reconnaissance étaient bien moins précis sur les femmes et les personnes racisées. Cathy O'Neil, met en lumière qu'ils ont la capacité d'exacerber les inégalités sociales.
+3. Open source communautés et apprentissage collectif
+La programmation est aussi inscrite dans des dynamiques communautaires. Des millions de développeurs partagent des savoirs, collaborent à des projets collectifs et réduisent des standards sur des plateformes comme GitHub, Stack Overflow ou Reddit. Gabriella Coleman, dans Coding Freedom (2013), décrivant ces communautés, les décrit comme des lieux où se forgent des identités, des valeurs éthiques et des formes de résistance à l'économie propriétaire.
+4. Platform power and digital capitalism
+Les grandes entreprises du numérique dominent de plus en plus les activités logicielles. Shoshana Zuboff décrit dans The Age of Surveillance Capitalism comment ces acteurs utilisent les informations personnelles dans des espaces logiciels diffusés partout. Nick Srnicek explore dans Platform Capitalism les régimes économiques basés sur l'exploitation algorithmique.
+5. Programmation et culture digitale
+Le code est également un vecteur culturel employé dans l'art génératif, le design interactif ou la musique numérique. Lev Manovich, dans Software Takes Command, propose une lecture de la culture contemporaine modelée par les logiciels. Casey Reas et Ben Fry, programmeurs de "Processing: A Programming Handbook for Visual Designers and Artists", ont démocratisé le code en outil artistique.
+
+
+Phases
+
+
+Conception
+
+La phase de conception définit le but du programme. Si on fait une rapide analyse fonctionnelle d'un programme, on détermine essentiellement les données qu'il va traiter (données d'entrée), la méthode employée (appelée l'algorithme), et le résultat (données de sortie). Les données d'entrée et de sortie peuvent être de nature très diverse. On peut décrire la méthode employée pour accomplir le but d'un programme à l'aide d'un algorithme. La programmation procédurale et fonctionnelle est basée sur l'algorithmique. On retrouve en général les mêmes fonctionnalités de base. On peut donc considérer que la programmation est le processus de traduction d'un algorithmique en un programme qui exécute cet algorithmique.
+Il existe deux méthodes principales pour concevoir un programme. La conception algorithmique consiste à construire le programme autour de l'algorithme qui est censé permettre d'obtenir le bon résultat. La conception procédurale consiste à trouver une suite d'actions à réaliser pour arriver au but. La conception procédurale est la plus utilisée.
+Lorsque le but est connu et que la méthode pour arriver au but est claire, on entre dans la conception détaillée. La conception détaillée est la spécification des données d'entrée, du résultat à obtenir, et l'algorithme avec toutes les instructions nécessaires.
+
+
+Programmation impérative
+
+"Si"
+Si prédicat
+Alors faire ceci
+Sinon faire cela
+"Tant que"
+Tant que prédicat
+Faire ...
+"Pour"
+Pour variable allant de borne inférieure à borne supérieure
+Faire ...
+"Pour" (variante)
+Pour variable dans conteneur
+faire ...
+
+
+Implémentation
+
+Une fois l'algorithme défini, l'étape suivante est de coder le programme. Le codage dépend de l'architecture sur laquelle va s'exécuter le programme, de compromis temps-mémoire, et d'autres contraintes. Ces contraintes vont déterminer quel langage de programmation utiliser pour « convertir » l'algorithme en code source.
+
+
+Transformation du code source
+Le code source n'est (presque) jamais utilisable tel quel. Il est généralement écrit dans un langage "de haut niveau", compréhensible pour l'homme, mais pas pour la machine.
+
+
+Compilation
+
+Certains langages sont ce qu'on appelle des langages compilés. En toute généralité, la compilation est l'opération qui consiste à transformer un langage source en un langage cible. Dans le cas d'un programme, le compilateur va transformer tout le texte représentant le code source du programme, en code compréhensible pour la machine, appelé code machine.
+Dans le cas de langages dits compilés, ce qui est exécuté est le résultat de la compilation. Une fois effectuée, l'exécutable obtenu peut être utilisé sans le code source.
+Le résultat de la compilation n'est pas forcément du code machine correspondant à la machine réelle, mais peut être du code compris par une machine virtuelle (c'est-à-dire un programme simulant une machine), auquel cas on parlera de bytecode. C'est par exemple le cas en Java. L'avantage est que, de cette façon, un programme peut fonctionner sur n'importe quelle machine réelle, du moment que la machine virtuelle existe pour celle-ci.
+Dans le cas d'une requête SQL, la requête est compilée en une expression utilisant les opérateurs de l'algèbre relationnelle. C'est cette expression qui est évaluée par le système de gestion de bases de données.
+
+
+Interprétation
+
+D'autres langages ne nécessitent pas de phase spéciale de compilation. La méthode employée pour exécuter le programme est alors différente. La phase de compilation est la plupart du temps incluse dans celle d’exécution. On dit de ce programme qu'il interprète le code source. Par exemple, Python ou Perl sont des langages interprétés.
+
+
+Avantages, inconvénients
+Les avantages généralement retenus pour l'utilisation de langages « compilés », est qu'ils sont plus rapides à l'exécution que des langages interprétés, car l'interprète doit être lancé à chaque exécution du programme, ce qui mobilise systématiquement les ressources.
+Traditionnellement, les langages interprétés offrent en revanche une certaine portabilité (la capacité à utiliser le code source sur différentes plates-formes), ainsi qu'une facilité pour l'écriture du code. En effet, il n'est pas nécessaire de passer par la phase de compilation pour tester le code source. Il n'est pas non plus nécessaire de disposer d'un autre programme (debugger) afin d’ôter les bugs du programme, c'est l’interpréteur qui permet d'afficher directement le contenu des variables du programme.
+
+
+Appellation impropre
+On parle abusivement de langages compilés ou interprétés. En effet, le caractère compilé ou interprété ne dépend pas du langage, qui n'est finalement qu'une grammaire et une certaine sémantique. D'ailleurs, certains langages peuvent être utilisés interprétés ou compilés. Par exemple, il est très courant d'utiliser Ruby avec un interprète, mais il existe également des compilateurs pour ce langage. On notera toutefois, qu'il peut être important de préciser comment le code source est exécuté. En effet, rares sont les organismes qui proposent à la fois un compilateur et un interpréteur, les résultats du programme peuvent différer à l'exécution, même si la norme du langage est clairement définie.
+Néanmoins, l'usage qu'on fait des langages est généralement fixé.
+
+
+Test du programme
+
+C'est l'une des étapes les plus importantes de la création d'un programme. En principe, tout programmeur se doit de vérifier chaque partie d'un programme, de le tester. Il existe différents types de test. On peut citer en particulier :
+
+Test unitaire
+Test d'intégration
+Test de performance
+Il est parfois possible de vérifier un programme informatique, c'est-à-dire prouver, de manière plus ou moins automatique, qu'il assure certaines propriétés.
+
+
+Pratiques
+Algorithmique
+Gestion de versions
+Optimisation de code
+Programmation système
+Refactoring
+Test d'intégration
+Test unitaire
+
+
+Paradigmes
+Un paradigme est un style fondamental de programmation, définissant la manière dont les programmes doivent être formulés.
+Un paradigme est la façon dont sont traitées les solutions aux problèmes et un style fondamental de programmation, définissant la manière dont les programmes doivent être formulés. Chaque paradigme amène sa philosophie de la programmation ; une fois qu'une solution a été imaginée par un programmeur selon un certain paradigme, un langage de programmation qui suit ce paradigme permettra de l'exprimer.
+
+
+Programmation impérative
+
+Le paradigme impératif est le plus répandu, les opérations sont une suite d’instructions exécutées par l'ordinateur pour modifier l'état du programme.
+
+
+Programmation procédurale
+
+La programmation procédurale est un sous-ensemble de la programmation impérative. Elle introduit la notion de routine ou fonction qui est une sorte de factorisation de code, chaque procédure peut être appelée à n’importe quelle étape du programme. Ce paradigme permet aussi de supprimer les instructions goto
+Ce paradigme est très répandu, il est présent dans des langages comme le C, le COBOL ou le FORTRAN.
+
+
+Programmation structurée
+
+Apparue dans les années 70, la programmation structurée est un sous-ensemble de la programmation impérative. Elle est née avec les travaux de Nicklaus Wirth pour son Algol W et l'article fondateur de Dijkstra dans Communications of the ACM, visant à supprimer l’instruction goto.
+Tous les langages procéduraux peuvent faire de la programmation structurée, mais certains comme le FORTRAN s'y prêtent très mal.
+
+
+Programmation déclarative
+
+En programmation déclarative, le programme est indépendant de l’état de la machine, il s’affranchit donc de tout effet de bord et un appel à une même fonction produira toujours le même résultat.
+Le programme s’écrit non pas comme une suite d’instruction pour résoudre un problème mais (contrairement à la programmation impérative) comme la solution au problème.
+
+
+Programmation fonctionnelle
+
+La programmation fonctionnelle se base sur plusieurs principes comme : l’immutabilité, les fonctions pures (qui ne dépendent pas de l’état de la machine) et les lambda-calcul.
+Aujourd’hui, nombreux sont les langages qui offrent une approche fonctionnelle au programmeur. Certains comme LISP ou Scala sont intrinsèquement fonctionnels. D’autres comme JavaScript, Java ou PHP ont ajouté cette possibilité par la suite.
+
+
+Programmation logique
+
+La programmation logique consiste à exprimer les problèmes et les algorithmes sous forme de prédicats à l’aide d'une base de faits, d'une base de règles et d'un moteur d'inférence.
+
+
+Programmation orientée objet
+
+La programmation orientée objet (abrégé POO) consiste en la définition et l'interaction de briques logicielles appelées objets ; ces objets représentent un concept, une idée. Chaque objet contient des attributs et des méthodes en rapport avec un sujet.
+
+
+Programmation orientée prototype
+
+La programmation orientée prototype est un sous ensemble de la programmation orientée objet. Dans ce paradigme, chaque objet est créé à partir d’un prototype qui est lui-même un objet. Le prototype a donc une existence physique en mémoire et est mutable contrairement aux classes.
+Le JavaScript, le Lua ou le Self sont des exemples de langages utilisant ce paradigme.
+
+
+Programmation orientée classe
+La programmation orientée classe est basée sur la notion de classes. Une classe est statique, c’est la représentation abstraite de l’objet, c’est à ce niveau que se passe l’héritage. Tout objet est donc l’instance d’une classe.
+Les langages à classes peuvent être sous forme fonctionnelle (CLOS) comme sous forme impérative (C++, Java), voir les deux (Python, OCaml).
+
+
+Autres paradigmes
+Programmation concurrente
+Programmation orientée aspect
+Programmation orientée composant
+Programmation par contrat
+Programmation par contraintes
+Programmation par intention
+Programmation réactive
+
+
+Notes et références
+
+
+Voir aussi
+
+
+Articles connexes
+Économie d'énergie d'un programme informatique
+Paradigme (programmation)
+Style de programmation
+Chronologie des langages de programmation
+Liste de langages de programmation
+Programmation web
+Forme de Backus-Naur (BNF), une grammaire de description de langage
+Google Code Jam, un concours international annuel de programmation très prisé des mordus d'algorithmique et de programmation
+Kata (programmation)
+Éditeur de texte
+Code créatif
+
+
+Liens externes
+
+Ressource relative à l'audiovisuel : France 24 
+
+ Portail de la programmation informatique

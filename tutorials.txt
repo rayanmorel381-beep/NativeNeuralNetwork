@@ -1,0 +1,475 @@
+Rust Learning Tutorials and Getting Started
+
+Chapter 1: Installation and First Program
+
+Installation: Visit https://rustup.rs/. Download and run the installer. Unix: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh. Restart terminal for PATH update. Verify: rustc --version.
+
+First Program:
+fn main() {
+    println!("Hello, world!");
+}
+
+Save as main.rs. Run: rustc main.rs && ./main. Better: cargo new hello, cd hello, cargo run.
+
+---
+
+Chapter 2: Variables and Basic Types
+
+Variables default immutable. let x = 5; creates immutable binding. let mut y = 5; creates mutable binding. Reassigning immutable raises error.
+
+Types:
+- Integers: i8, i16, i32, i64, i128 (signed), u8, u16, u32, u64, u128 (unsigned)
+- Floats: f32, f64
+- Boolean: bool (true, false)
+- Char: char (Unicode character)
+
+Type annotation: let x: i32 = 42;
+Type inference: compiler deduces types from context.
+
+---
+
+Chapter 3: Functions
+
+fn add(x: i32, y: i32) -> i32 {
+    x + y
+}
+
+Parameters require type annotations. Return type after ->. Last expression is return value (no semicolon).
+
+---
+
+Chapter 4: Control Flow
+
+If expressions:
+if x > 0 { println!("positive"); } else { println!("not positive"); }
+
+Loops:
+loop { ... } infinite loop
+while x < 10 { ... } conditional loop
+for i in 0..10 { ... } iterate 0 to 9
+
+---
+
+Chapter 5: Ownership and Borrowing
+
+Every value has one owner. Moving transfers ownership.
+let s1 = String::from("hello");
+let s2 = s1; // ownership moves to s2, s1 invalid
+
+Borrowing: let r = &s; creates immutable reference.
+let r = &mut s; creates mutable reference (only one at a time).
+
+---
+
+Chapter 6: Structs
+
+struct User {
+    name: String,
+    email: String,
+    age: u32,
+}
+
+impl User {
+    fn new(name: String, email: String, age: u32) -> User {
+        User { name, email, age }
+    }
+    
+    fn display(&self) {
+        println!("{} ({}) - {}", self.name, self.email, self.age);
+    }
+}
+
+---
+
+Chapter 7: Enums and Pattern Matching
+
+enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(i32, i32, i32),
+}
+
+match msg {
+    Message::Quit => return,
+    Message::Move { x, y } => println!("Move to ({}, {})", x, y),
+    Message::Write(s) => println!("Write: {}", s),
+    Message::ChangeColor(r, g, b) => println!("Color: ({}, {}, {})", r, g, b),
+}
+
+---
+
+Chapter 8: Collections
+
+Vec<T>: growable array
+let v = vec![1, 2, 3];
+v.push(4);
+for item in v { println!("{}", item); }
+
+HashMap<K, V>: key-value store
+let mut map = HashMap::new();
+map.insert("key", "value");
+map.get("key");
+
+String: mutable UTF-8 text
+let s = String::from("hello");
+s.push_str(" world");
+
+---
+
+Chapter 9: Error Handling with Result
+
+Result<T, E>: Ok(value) or Err(error)
+fn parse_int(s: &str) -> Result<i32, ParseIntError> {
+    s.parse::<i32>()
+}
+
+match result {
+    Ok(n) => println!("Parsed: {}", n),
+    Err(e) => println!("Error: {}", e),
+}
+
+Using ?: fn parse() -> Result<i32, ParseIntError> { Ok(42.parse()?) }
+
+---
+
+Chapter 10: Traits
+
+trait Animal {
+    fn speak(&self);
+    fn move_around(&self) { println!("Moving"); }
+}
+
+struct Dog;
+impl Animal for Dog {
+    fn speak(&self) { println!("Woof!"); }
+}
+
+let dog = Dog;
+dog.speak();
+
+---
+
+Chapter 11: Generics
+
+fn largest<T: PartialOrd>(list: &[T]) -> &T { ... }
+
+Trait bounds constrain generic types. T: PartialOrd requires comparison support.
+
+---
+
+Chapter 12: Lifetimes
+
+fn first_word(s: &str) -> &str { ... }
+
+Compiler infers lifetimes in simple cases. Explicit: fn first_word<'a>(s: &'a str) -> &'a str
+
+---
+
+Chapter 13: Testing
+
+#[test]
+fn it_works() {
+    assert_eq!(2 + 2, 4);
+}
+
+cargo test runs all tests. Tests panic on assertion failure.
+
+---
+
+Chapter 14: Modules and Packages
+
+mod math {
+    pub fn add(a: i32, b: i32) -> i32 { a + b }
+}
+
+use math::add;
+
+Modules organize code. pub makes items public. use imports items.
+
+---
+
+Chapter 15: Getting Help
+
+Documentation: cargo doc --open generates local docs.
+Compiler errors: read carefully, try suggested fixes.
+Clippy: cargo clippy suggests improvements.
+Community: forums, Discord servers, Stack Overflow.
+Official book: https://doc.rust-lang.org/book/
+
+
+Chapter 16: Traits and Generics
+
+Traits define shared interfaces. Types implement them.
+trait Greet {
+    fn hello(&self) -> String;
+}
+
+struct English;
+struct French;
+
+impl Greet for English {
+    fn hello(&self) -> String { String::from("Hello!") }
+}
+
+impl Greet for French {
+    fn hello(&self) -> String { String::from("Bonjour!") }
+}
+
+fn greet_everyone(greeters: &[&dyn Greet]) {
+    for g in greeters { println!("{}", g.hello()); }
+}
+
+Generics enable code that works over many types:
+fn largest<T: PartialOrd>(list: &[T]) -> &T {
+    let mut largest = &list[0];
+    for item in list { if item > largest { largest = item; } }
+    largest
+}
+
+---
+
+Chapter 17: Error Handling in Depth
+
+Custom error types enable rich error information:
+use std::fmt;
+
+#[derive(Debug)]
+enum AppError {
+    Io(std::io::Error),
+    Parse(std::num::ParseIntError),
+    Custom(String),
+}
+
+impl fmt::Display for AppError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            AppError::Io(e) => write!(f, "IO error: {}", e),
+            AppError::Parse(e) => write!(f, "Parse error: {}", e),
+            AppError::Custom(s) => write!(f, "Error: {}", s),
+        }
+    }
+}
+
+impl From<std::io::Error> for AppError {
+    fn from(e: std::io::Error) -> Self { AppError::Io(e) }
+}
+
+fn parse_file(path: &str) -> Result<i32, AppError> {
+    let content = std::fs::read_to_string(path)?;  // uses From<io::Error>
+    let n = content.trim().parse::<i32>()
+        .map_err(AppError::Parse)?;
+    Ok(n)
+}
+
+---
+
+Chapter 18: Closures and Iterators
+
+Closures capture from their environment:
+fn apply_twice<F: Fn(i32) -> i32>(f: F, x: i32) -> i32 { f(f(x)) }
+
+let double = |x| x * 2;
+println!("{}", apply_twice(double, 3)); // 12
+
+Iterator adapters are lazy; only collect() materializes results:
+let evens_squared: Vec<i32> = (1..=20)
+    .filter(|x| x % 2 == 0)
+    .map(|x| x * x)
+    .collect();
+
+Custom iterator:
+struct Counter { count: u32, max: u32 }
+impl Counter { fn new(max: u32) -> Self { Counter { count: 0, max } } }
+impl Iterator for Counter {
+    type Item = u32;
+    fn next(&mut self) -> Option<u32> {
+        if self.count < self.max { self.count += 1; Some(self.count) }
+        else { None }
+    }
+}
+
+---
+
+Chapter 19: Lifetimes
+
+Lifetimes ensure references stay valid:
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+    if x.len() > y.len() { x } else { y }
+}
+
+Structs can hold references with lifetime annotations:
+struct Important<'a> { content: &'a str }
+
+impl<'a> Important<'a> {
+    fn announce(&self) -> &str { self.content }
+}
+
+Lifetime elision rules: single input lifetime copied to output.
+fn first_word(s: &str) -> &str {
+    s.split_whitespace().next().unwrap_or("")
+}
+// compiler infers: fn first_word<'a>(s: &'a str) -> &'a str
+
+---
+
+Chapter 20: Smart Pointers
+
+Box<T> allocates on heap, useful for recursive types:
+enum Tree { Leaf(i32), Node(Box<Tree>, Box<Tree>) }
+
+Rc<T> for shared ownership in single-threaded contexts:
+use std::rc::Rc;
+let a = Rc::new(5);
+let b = Rc::clone(&a);  // both own same data
+println!("count = {}", Rc::strong_count(&a)); // 2
+
+RefCell<T> for interior mutability:
+use std::cell::RefCell;
+let data = RefCell::new(vec![1, 2, 3]);
+data.borrow_mut().push(4);  // runtime borrow check
+println!("{:?}", data.borrow());
+
+Combining Rc<RefCell<T>> enables shared mutable state:
+use std::rc::Rc; use std::cell::RefCell;
+let shared = Rc::new(RefCell::new(0));
+let clone1 = Rc::clone(&shared);
+let clone2 = Rc::clone(&shared);
+*clone1.borrow_mut() += 10;
+*clone2.borrow_mut() += 5;
+println!("{}", shared.borrow()); // 15
+
+---
+
+Chapter 21: Concurrency
+
+Spawn threads with std::thread::spawn:
+use std::thread;
+let handle = thread::spawn(|| {
+    for i in 0..5 { println!("thread: {i}"); }
+});
+handle.join().unwrap();
+
+Move ownership into threads:
+let v = vec![1, 2, 3];
+let handle = thread::spawn(move || {
+    println!("{:?}", v);  // v moved into closure
+});
+handle.join().unwrap();
+
+Channels for message passing:
+use std::sync::mpsc;
+let (tx, rx) = mpsc::channel();
+thread::spawn(move || { tx.send(42).unwrap(); });
+println!("received: {}", rx.recv().unwrap());
+
+Shared state with Arc<Mutex<T>>:
+use std::sync::{Arc, Mutex};
+let counter = Arc::new(Mutex::new(0));
+let mut handles = vec![];
+for _ in 0..10 {
+    let c = Arc::clone(&counter);
+    handles.push(thread::spawn(move || { *c.lock().unwrap() += 1; }));
+}
+for h in handles { h.join().unwrap(); }
+println!("count: {}", *counter.lock().unwrap());
+
+---
+
+Chapter 22: Testing
+
+Unit tests in the same file, inside #[cfg(test)] module:
+fn add(a: i32, b: i32) -> i32 { a + b }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_add_positive() { assert_eq!(add(2, 3), 5); }
+
+    #[test]
+    fn test_add_negative() { assert_eq!(add(-1, -1), -2); }
+
+    #[test]
+    #[should_panic(expected = "attempt to add with overflow")]
+    fn test_overflow() { add(i32::MAX, 1); }
+}
+
+Integration tests in tests/ directory:
+// tests/integration_test.rs
+use my_crate::add;
+#[test]
+fn test_from_outside() { assert_eq!(add(10, 20), 30); }
+
+Run all tests: cargo test. Run specific: cargo test test_add.
+
+---
+
+Chapter 23: Unsafe Code
+
+Unsafe blocks allow raw pointer operations:
+let x = 5;
+let r = &x as *const i32;          // raw pointer
+unsafe { println!("{}", *r); }     // dereference requires unsafe
+
+Unsafe functions must be called in unsafe blocks:
+unsafe fn dangerous_op() { /* low-level code */ }
+unsafe { dangerous_op(); }
+
+Common legitimate uses of unsafe:
+- Dereferencing raw pointers from C FFI
+- Implementing zero-cost abstractions (slice::from_raw_parts)
+- Calling extern "C" functions
+- Static mut access (use atomic instead when possible)
+
+Always document invariants that must hold for safety.
+
+---
+
+Chapter 24: Macros
+
+Declarative macros with macro_rules!:
+macro_rules! hello {
+    () => { println!("Hello!"); };
+    ($name:expr) => { println!("Hello, {}!", $name); };
+}
+
+hello!();
+hello!("Alice");
+
+Repetition patterns:
+macro_rules! sum {
+    ($($x:expr),*) => {
+        { let mut total = 0; $(total += $x;)* total }
+    };
+}
+println!("{}", sum!(1, 2, 3, 4)); // 10
+
+Common built-in macros: println!, format!, vec!, assert!, todo!, unimplemented!.
+
+---
+
+Chapter 25: Cargo and the Ecosystem
+
+Cargo.toml controls dependencies and build:
+[package]
+name = "my_app"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+
+[dev-dependencies]
+criterion = "0.5"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+
+Commands: cargo build, cargo test, cargo run, cargo doc --open, cargo clippy, cargo fmt.
+Features control optional functionality: cargo build --features "feature1,feature2".
+Workspaces share Cargo.lock: place [workspace] members = [...] in root Cargo.toml.
+

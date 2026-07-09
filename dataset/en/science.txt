@@ -1,0 +1,234 @@
+Scientific Computing and Rust
+
+Machine Learning Frameworks
+
+TensorFlow Bindings: tf-rust provides Rust API to TensorFlow. Graph building, training, inference. GPU acceleration. Production deployments.
+
+PyTorch Integration: tch-rs binds PyTorch. NumPy-like operations. GPU compute. Transfer learning.
+
+Pure Rust ML: burn framework for deep learning entirely in Rust. Polars for DataFrames. No Python dependency. Compile to WASM.
+
+ndarray: NumPy-like n-dimensional arrays. Linear algebra operations. Statistical functions. Performance comparable to NumPy.
+
+Data Processing
+
+Polars: Fast DataFrame library. SQL queries on data. Parallel execution. Handles gigabytes efficiently.
+
+Arrow: Columnar data format. Zero-copy interoperability. Standard for data exchange. Supports complex types.
+
+DuckDB: OLAP database, embeddable. SQL queries. Analytical workloads. Fast aggregations.
+
+CSV: Reading/writing CSV files efficiently. Custom parsing. Error handling.
+
+Numerical Methods
+
+Special Functions: special crate provides Bessel, gamma, error functions. Scientific calculations. Mathematical constants.
+
+Root Finding: solvers for equations. Newton-Raphson. Bisection methods. Convergence detection.
+
+Integration: numerical integration quadrature. Monte Carlo methods. Adaptive algorithms.
+
+Differential Equations: ODE solvers. Runge-Kutta methods. Stiff equation handling. Phase space integration.
+
+Statistical Analysis
+
+statrs: distributions, statistics, testing. Probability calculations. Hypothesis testing. Sampling.
+
+Distributions: normal, binomial, poisson, uniform. PDF/CDF/quantile functions. Random sampling.
+
+Descriptive Statistics: mean, variance, median, quartiles. Skewness, kurtosis. Correlation matrices.
+
+Hypothesis Testing: t-tests, chi-square. P-values. Confidence intervals.
+
+Scientific Visualization
+
+plotly-rs: Interactive Rust plots. Web-based visualization. Export HTML, PNG, SVG.
+
+ndarray-stats: Statistical plots. Histograms, scatter plots. Heatmaps.
+
+gnuplot Interface: Control gnuplot from Rust. Scientific plots. Publication quality.
+
+GPU Computing
+
+CUDA Support: accel crate for NVIDIA GPUs. Kernels in Rust. Memory management.
+
+OpenGL: Graphics rendering. Compute shaders. Interactive visualization.
+
+Vulkan: Modern graphics API. Compute capabilities. Cross-platform.
+
+Metal: macOS GPU acceleration.
+
+Direct3D: Windows GPU compute.
+
+Computational Physics
+
+Particle Simulations: N-body simulations. Molecular dynamics. Efficient spatial indexing. Millions of particles.
+
+Differential Equations: Physics simulations with ODEs. RK45 integrators. Adaptive stepping.
+
+FFT: Fast Fourier Transform. realfft for real-valued FFTs. Spectral methods.
+
+Linear Algebra: nalgebra for matrices. Eigendecomposition. SVD. Efficient sparse operations.
+
+Climate Modeling
+
+Large-scale Simulations: Grid-based computations. Numerical weather prediction. Climate simulations.
+
+Parallelization: Rayon for CPU parallelism. GPU acceleration for speed. I/O optimization for large datasets.
+
+Time Series Analysis
+
+Sequences: Working with time-indexed data. Rolling windows. Sliding operations.
+
+Moving Averages: Simple, exponential. Smoothing. Trend extraction.
+
+Autoregressive Models: AR(p) models. ARIMA. Forecasting.
+
+Seasonality Detection: Fourier analysis. STL decomposition.
+
+Bioinformatics
+
+Sequence Alignment: Smith-Waterman alignment. BLAST-like searches. Similarity scoring.
+
+DNA Analysis: bio crate for biological sequences. Codon translation. GC content.
+
+Genomics: SNP calling. Variant analysis. Population genetics.
+
+Protein Structure: PDB file parsing. Structure prediction. Docking simulations.
+
+Spectroscopy
+
+Spectra Processing: Peak detection. Smoothing filters. Baseline correction.
+
+Calibration: Instrument calibration. Curve fitting. Validation.
+
+Analysis: Spectral fingerprinting. Identification. Quantification.
+
+Advanced Algorithms
+
+Sorting Algorithms: Quicksort. Mergesort. Heapsort. Implementation details. Cache behavior. Parallel sorting.
+
+Searching: Binary search. Hash tables. Tree structures. Time complexity analysis. Space trade-offs.
+
+Graph Algorithms: Dijkstra shortest path. DFS/BFS traversal. Minimum spanning tree. Network analysis. Performance characteristics.
+
+Dynamic Programming: Memoization. Bottom-up computation. State transitions. Optimal substructure. Problem reduction.
+
+Linear Algebra at Scale
+
+Matrix Operations: Dense matrices. Sparse matrices. Efficient storage. GPU computation. SIMD optimizations.
+
+Eigenvalue Decomposition: Spectral analysis. Principal component analysis. Variance extraction. Dimensionality reduction.
+
+Singular Value Decomposition: Matrix factorization. Rank approximation. Data compression. Noise reduction.
+
+Least Squares Problems: Overdetermined systems. Normal equations. QR decomposition. Optimization basis.
+
+Optimization Methods
+
+Gradient Descent: Convex optimization. Learning rates. Convergence analysis. Stochastic variants. Mini-batch processing.
+
+Newton's Method: Second-order optimization. Hessian matrix. Quadratic convergence. Region of convergence. Practical issues.
+
+Genetic Algorithms: Population-based search. Mutation operators. Crossover operations. Selection pressure. Parameter tuning.
+
+Simulated Annealing: Temperature schedules. Cooling rates. Metropolis criterion. Escape local optima. Hyperparameter sensitivity.
+
+Probability and Statistics
+
+Hypothesis Testing: Null hypothesis. P-values. Type I and II errors. Statistical power. Effect sizes.
+
+Confidence Intervals: Coverage probability. Bootstrap methods. Bayesian intervals. Interpretation. Precision measures.
+
+Bayesian Methods: Prior distributions. Posterior inference. MCMC sampling. Variational inference. Decision making.
+
+Information Theory: Entropy. Mutual information. KL divergence. Cross-entropy. Data compression bounds.
+
+Machine Learning Workflows
+
+Feature Engineering: Normalization. Scaling. Feature selection. Dimensionality reduction. Feature creation.
+
+Cross-Validation: k-fold splitting. Stratified sampling. Time series splitting. Hyperparameter optimization. Overfitting detection.
+
+Model Evaluation: Confusion matrix. ROC curves. Precision-recall. F1 scores. Calibration curves.
+
+Hyperparameter Tuning: Grid search. Random search. Bayesian optimization. Learning curves. Validation strategies.
+
+Data Analysis
+
+Exploratory Analysis: Summary statistics. Distributions. Correlations. Outlier detection. Missing data patterns.
+
+Time Series Analysis: Stationarity. Autocorrelation. Seasonal decomposition. Forecasting. Anomaly detection.
+
+Survival Analysis: Censoring. Kaplan-Meier curves. Cox regression. Hazard ratios. Event time prediction.
+
+Anomaly Detection: Isolation forests. One-class SVM. Autoencoder reconstruction. Statistical thresholding.
+
+Machine Learning in Pure Rust
+
+The burn framework provides deep learning entirely in Rust with multiple backends: NdArray for CPU computation, Wgpu for GPU via WebGPU, Candle for lightweight inference. Models defined using a module system similar to PyTorch. Automatic differentiation through autodiff. Serialization to various formats. The absence of a Python runtime means deployment is a single statically-linked binary.
+
+Candle from HuggingFace provides a minimalist ML framework. Supports CUDA and Metal backends. Runs popular models: LLaMA, Whisper, BERT, StableDiffusion. Designed for inference rather than training. Integrates with the broader HuggingFace model hub ecosystem.
+
+Linfa provides a Rust-native scikit-learn equivalent. Algorithms: k-means, DBSCAN, linear regression, logistic regression, SVM, decision trees, naive Bayes, k-nearest neighbors. Consistent API across algorithms using generic trait-based design. Works on ndarray datasets.
+
+Numerical Computing Foundations
+
+ndarray provides N-dimensional arrays with broadcasting, slicing, and element-wise operations following NumPy conventions. The ArrayBase type parameterizes over storage backend: owned, borrowed, or copy-on-write. blas-lapack-rs bindings provide access to optimized BLAS routines for matrix-matrix multiplication and linear solves.
+
+nalgebra targets linear algebra with strong type-level guarantees. Matrix dimensions can be statically known: Matrix3<f64> is a 3×3 matrix at compile time, enabling zero-cost dimension checks. Used in robotics (nalgebra + nphysics) and computer graphics. Supports a wide range of decompositions: LU, QR, SVD, Cholesky, eigenvalues.
+
+For parallel numerical computation, rayon provides data parallelism over ndarray via ndarray-parallel. The par_iter() method on arrays distributes work across CPU cores automatically. For GPU offloading, wgpu and CUDA bindings allow compute shaders to handle large matrix operations.
+
+Computational Physics
+
+The physical constants crate provides typed physical constants with units. Dimensional analysis via typenum or uom (units of measurement) catches unit errors at compile time. A function accepting Length<f64> cannot receive Mass<f64> without explicit conversion.
+
+ODE solvers in ode_solvers implement Runge-Kutta 4/5, Dormand-Prince, and other adaptive-step methods. The State trait generalizes over array types. Step size control adjusts dynamically based on error estimates. Conservation of energy properties can be monitored during integration.
+
+Molecular dynamics: lumol is a modular simulation engine in Rust. Systems with hundreds of thousands of atoms. Force field evaluations parallelized via rayon. Trajectory output in XYZ and DCD formats. The architecture separates force evaluation, integration, and output, enabling customization.
+
+Bioinformatics Ecosystem
+
+rust-bio implements fundamental sequence algorithms: Smith-Waterman alignment with affine gap penalties, Needleman-Wunsch, BLAST-style seeding, FM-index for exact substring search, suffix arrays, de Bruijn graphs. All algorithms implemented with iterators for memory efficiency on large genomic datasets.
+
+noodles provides async-capable parsers for bioinformatics file formats: FASTA, FASTQ, BAM, SAM, CRAM, VCF, BCF, GFF, BED. The streaming design handles files larger than available RAM. Index support enables random access to specific genomic regions.
+
+For workflows, Nextflow and Snakemake support Rust binaries as process steps. The combination of deterministic builds and static linking makes Rust binaries ideal for reproducible bioinformatics pipelines: no shared library version conflicts, consistent behavior across HPC nodes.
+
+Statistics and Probability
+
+The statrs crate implements a comprehensive statistics library. Continuous distributions: Normal, LogNormal, Student-t, Chi-squared, F, Beta, Gamma, Exponential, Weibull, Uniform, Cauchy, Laplace. Discrete distributions: Binomial, Poisson, Geometric, Hypergeometric, NegativeBinomial, Bernoulli. Each distribution provides PDF/PMF, CDF, inverse CDF (quantile), moments, and random sampling.
+
+Bayesian inference via the `rug` crate provides arbitrary-precision arithmetic for numerical stability in MCMC chains. The markov-chain-monte-carlo crate implements Metropolis-Hastings and Hamiltonian Monte Carlo. For variational inference, autodiff crates enable gradient computation.
+
+Hypothesis testing: z-tests, t-tests, chi-squared tests, ANOVA, Kolmogorov-Smirnov, Mann-Whitney U test. Multiple testing correction: Bonferroni, Benjamini-Hochberg FDR. Effect size measures: Cohen's d, odds ratio, relative risk.
+
+Physics Simulation. rapier is a 2D and 3D rigid-body physics engine written in pure Rust. Used by the Bevy game engine and several robotics simulators. Provides collision detection, rigid body dynamics, joints, and constraints. nalgebra is the underlying linear algebra library providing matrices, vectors, and geometric transformations. avian is a newer physics engine targeting the Bevy ECS architecture natively.
+
+Computational Chemistry. Early Rust crates for molecular representation and property calculation are emerging in academic research groups. Interfaces to quantum chemistry tools (ORCA, Gaussian) via FFI bindings allow Rust to serve as a high-performance glue layer. rdkit-rs wraps the mature RDKit toolkit for cheminformatics, enabling substructure search, fingerprinting, and property prediction.
+
+Advanced Bioinformatics. noodles handles genomics file formats: BAM, SAM, CRAM, VCF, BCF, FASTQ, FASTA with streaming parsers. needletail processes FASTA and FASTQ files at high speed. polars processes large genomic tables. rust-bio provides foundational algorithms: sequence alignment (Smith-Waterman, Needleman-Wunsch), suffix arrays, BWT, and FM-index. Mash and minimap2 have Rust bindings for comparative genomics.
+
+Astronomy and Astrophysics. FITS file parsing is supported by dedicated crates matching the astronomical standard. N-body simulations use Rust for gravitational force kernel calculation, benefiting from auto-vectorization and rayon parallelism. Coordinate transformations and time standards for astronomical calculations are implemented in the astro-utils family of crates.
+
+Native Machine Learning. linfa provides classical ML algorithms without deep learning: linear and logistic regression, k-means, SVM, PCA, decision trees, all in pure Rust without Python or BLAS dependencies. burn is a full deep learning framework with multiple backends: WGPU for GPU computation, ndarray for CPU, and Candle integration for inference. candle from Hugging Face targets LLM inference in pure Rust with zero C dependencies.
+
+Computer Vision. image is the standard crate for image decoding and processing (JPEG, PNG, WebP, BMP, TIFF). imageproc provides vision algorithms: edge detection, geometric transformations, morphological filters, template matching. For industrial pipelines, opencv-rust bindings give access to the mature OpenCV library ecosystem. nokhwa provides a unified camera capture API across platforms.
+
+Natural Language Processing. Hugging Face tokenizers are implemented in Rust and exposed via Python bindings, processing text at hundreds of megabytes per second. rust-tokenizers implements BPE, WordPiece, and SentencePiece from scratch. hnswlib-rs implements the HNSW algorithm for approximate nearest neighbor search in high-dimensional vector spaces, used for embedding retrieval in RAG systems.
+
+High Performance Computing. MPI bindings enable distributed computation on clusters. GPU computing is accessible via cust for CUDA and cudarc for a more ergonomic CUDA interface. wgpu provides a portable GPU API running on Vulkan, Metal, and DirectX. Rust is used in climate modeling and computational fluid dynamics simulations for its C++-class performance with memory safety guarantees.
+
+Structured Data Analysis. polars is the reference Rust DataFrame library. Its columnar design, lazy evaluation, and multi-threaded execution engine make it consistently faster than pandas. SQL analytics are available via duckdb-rs, which wraps the DuckDB engine to run analytical queries directly on DataFrames or Parquet files without a database server.
+
+Symbolic Mathematics and Automatic Differentiation. Forward-mode and reverse-mode automatic differentiation are provided by crates including ad and dual-num. These enable gradient computation for optimization algorithms without manual derivative derivation. Symbolic expression manipulation is an active area with crates targeting computer algebra system capabilities.
+
+Financial Modeling. Options pricing (Black-Scholes, binomial trees, Monte Carlo), risk quantification, and yield curve fitting are implemented as Rust libraries. The deterministic latency profile from the absence of GC pauses is critical for high-frequency trading systems. Fixed-point arithmetic crates handle precise decimal calculations required for financial regulations.
+
+Scientific Infrastructure. Rust is adopted in laboratory infrastructure: parsers for scientific data formats (HDF5, NetCDF, Zarr), batch processing pipelines, and distributed computation servers. Through PyO3, Rust libraries are callable from Python with native performance. Through extendr, they integrate with R. Julia interoperates via FFI. This enables progressive integration into existing scientific workflows without full rewrites.
+
+Quantum Computing. quantum and spinoza are early Rust crates for quantum circuit simulation. They simulate qubit state vectors and gate operations on classical hardware. As quantum hardware matures, Rust's performance characteristics and safety guarantees make it a candidate for quantum software development kits targeting real hardware backends.
+
+Robotics. The ROS2 ecosystem has Rust bindings via r2r and rclrs. NAV2 and MoveIt2 integration is progressing. The real-time constraints of robotics systems, combined with Rust's predictable latency, make it attractive for robot operating systems. Embedded robotics firmware uses Embassy on microcontrollers for sensor fusion and motor control loops.
+

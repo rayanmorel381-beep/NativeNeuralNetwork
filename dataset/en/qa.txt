@@ -1,0 +1,234 @@
+Frequently Asked Questions About Rust Programming
+
+Installation and Setup
+
+Q: How do I install Rust?
+A: Visit https://rustup.rs/ and run the installer script. For Linux/macOS: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh. For Windows download and run the installer. Update with: rustup update.
+
+Q: What's rustup?
+A: rustup is the Rust toolchain installer. It manages rustc (compiler), cargo (package manager), and standard library. Multiple toolchains supported: stable, beta, nightly. rustup default stable sets default toolchain.
+
+Q: How do I verify installation?
+A: Run: rustc --version, cargo --version. Both should display versions. Create test project: cargo new hello, cargo run.
+
+Project Management with Cargo
+
+Q: What's Cargo?
+A: Cargo is Rust's package manager and build system. It manages dependencies, compiles code, runs tests, publishes packages. Cargo.toml specifies project metadata and dependencies. cargo.lock locks versions for reproducible builds.
+
+Q: How do I create a new project?
+A: cargo new project_name creates binary project. cargo new --lib creates library. Creates directory with src/, Cargo.toml, and .gitignore.
+
+Q: How do I add dependencies?
+A: Edit Cargo.toml: [dependencies] section. Example: serde = "1.0". cargo update fetches latest. cargo tree shows dependency graph.
+
+Q: How do I manage different profiles?
+A: Cargo supports dev, release, test, bench profiles. [profile.release] in Cargo.toml configures. Debug builds fast, unoptimized. Release builds slower, optimized. Use cargo build --release for deployment.
+
+Q: How do I publish my crate?
+A: cargo publish uploads to Crates.io. Requires account and token. First run: cargo package checks. Documentation on docs.rs auto-generates. Each version published once, immutable.
+
+Compilation and Building
+
+Q: How do I build my project?
+A: cargo build compiles debug build. cargo build --release compiles optimized. cargo check checks without building. cargo clean removes build artifacts.
+
+Q: What's the difference between check and build?
+A: cargo check performs type checking and analysis faster. Doesn't generate binaries. Useful for development iterations. cargo build generates executables.
+
+Q: How do I compile for different targets?
+A: rustup target add wasm32-unknown-unknown adds wasm target. cargo build --target wasm32-unknown-unknown builds for wasm. Android: cargo ndk -t arm64-v8a build.
+
+Testing and Debugging
+
+Q: How do I write tests?
+A: Use #[test] attribute on test functions. cargo test runs all tests. Tests panic on assertion failure. Integration tests live in tests/ directory.
+
+Q: What test frameworks exist?
+A: Standard library provides basic testing. criterion crate for benchmarks. proptest for property testing. tokio test macro for async tests.
+
+Q: How do I debug Rust code?
+A: Use debug builds: cargo build (not --release). GDB/LLDB for debugging: rust-gdb, rust-lldb. println! for basic debugging. Built-in Debug trait with {:?} format.
+
+Q: How do I measure performance?
+A: cargo bench runs benchmarks. criterion crate for statistical benchmarks. flamegraph for CPU profiling. perf for detailed analysis. Release builds for accurate timing.
+
+Language Features
+
+Q: What's ownership?
+A: Every value has one owner. Moving transfers ownership. Borrowing creates references. Dropping frees resources when owner goes out of scope. Prevents dangling pointers and double-frees.
+
+Q: What's a lifetime?
+A: Lifetimes track how long references remain valid. 'a is a lifetime parameter. Borrow checker verifies references outlive referents. Lifetime elision hides annotations in simple cases.
+
+Q: What's a trait?
+A: Trait defines interface with methods. Types implement traits. Trait bounds constrain generics. Trait objects enable dynamic dispatch. Similar to interfaces in other languages.
+
+Q: What's a macro?
+A: Macro is compile-time code generation. macro_rules! defines patterns and expansions. println!, vec!, format! are builtins. Procedural macros are functions transforming code.
+
+Q: What's the difference between impl Trait and dyn Trait?
+A: impl Trait monomorphizes code at compile-time, generates specialized code. dyn Trait dispatches dynamically at runtime. impl Trait for returns and params. dyn Trait for trait objects in collections.
+
+Common Errors and Solutions
+
+Q: Cannot move out of borrowed context?
+A: Values behind & references can't move. Clone if needed. Use move closures: move || { }. Redesign with ownership if possible.
+
+Q: Lifetime mismatch errors?
+A: Add explicit lifetime annotations. fn foo<'a>(x: &'a str) -> &'a str. Borrow checker needs to understand relationships.
+
+Q: Expected one of but found X?
+A: Syntax error. Check for missing commas, semicolons, braces. cargo check provides error messages with line numbers.
+
+Q: Trait cannot be made into object?
+A: Trait must be object-safe. No generic Self::Sized. All methods take &self. Use dyn Trait for dynamic dispatch.
+
+Q: Stack overflow from recursive types?
+A: Use Box to break cycles. struct Tree { left: Box<Tree>, right: Box<Tree> }. Box stops infinite recursion.
+
+Dependency Management
+
+Q: How do I update dependencies safely?
+A: cargo update updates to newest compatible. Review changes before updating. Test thoroughly. Use cargo-outdated to find available updates. Read changelogs for breaking changes.
+
+Q: What's semantic versioning?
+A: MAJOR.MINOR.PATCH format. MAJOR: breaking changes. MINOR: new features backward compatible. PATCH: bug fixes. ^1.2.3 matches 1.x. =1.2.3 exact version.
+
+Q: How do I manage transitive dependencies?
+A: cargo tree shows dependency graph. Cargo.lock locks transitive versions. cargo update --aggressive updates all. Conflicting versions can bloat binary.
+
+Q: Can I use local dependencies?
+A: Yes, path = "../other_crate" in Cargo.toml. Useful for monorepos. Workspace feature for multiple crates. Dependencies resolve locally first.
+
+Working with Features
+
+Q: How do I use cargo features?
+A: [features] in Cargo.toml defines. default feature list auto-enabled. cargo build --no-default-features disables. cargo build --features feature1,feature2 enables.
+
+Q: How do I implement optional functionality?
+A: Use #[cfg(feature = "myfeature")] gate code. Optional dependencies in [dependencies]. Feature combinations tested. Default features reasonable default.
+
+Q: What's a feature flag?
+A: Compile-time flag enabling code sections. Conditional compilation. Optional dependencies. Different behavior based on features.
+
+Compilation Details
+
+Q: Why does compilation take so long?
+A: Monomorphization generates code per type. Linking takes time. LLVM optimization passes. Incremental compilation helps during development.
+
+Q: How do I speed up compilation?
+A: cargo build in debug mode fastest. Link-time optimization slow. Cargo cache helps. Split projects into smaller crates. Use opt-level=1 in debug.
+
+Q: What's incremental compilation?
+A: Tracks changed code. Recompiles only affected. Faster iteration. cache/incremental stores state. Can be disabled if issues.
+
+Advanced Patterns
+
+Q: How do I use RAII pattern?
+A: Resource Acquisition Is Initialization. struct acquires resource. Drop trait frees. Scoping ensures cleanup. Panic-safe resource management.
+
+Q: What's the type state pattern?
+A: Types encode state. Struct fields as type parameters. Only valid transitions allowed. Compile-time safety. Prevents invalid operations.
+
+Q: How do I implement builder pattern well?
+A: Each builder method returns Self. Consumes and rebuilds. Final build() produces result. Type safety. Ergonomic configuration.
+
+Optimization
+
+Q: How do I inline code?
+A: #[inline] suggests inlining. #[inline(always)] forces. #[inline(never)] prevents. Compiler optimizes best. Hints guide decisions.
+
+Q: What's monomorphization cost?
+A: Code bloat with many type specializations. Generic over too many types expensive. Balance between size and performance. Shared generics help.
+
+Q: How do I profile allocations?
+A: valgrind --tool=massif. heaptrack visualization. Identify hot paths. Remove unnecessary allocations. Use stack when possible.
+
+Advanced Error Handling
+
+Q: How do I create custom error types?
+A: Enum for variants. Implement Display trait. Implement Error trait. From implementations for conversions. thiserror macro for derivation. Context information included.
+
+Q: What's error chaining?
+A: anyhow crate. Error context layers. Backtrace-like structure. Root cause identification. Error reporting. User-friendly messages. Internal details preserved.
+
+Q: How do I handle recoverable vs fatal?
+A: Recoverable: Result<T, E>. Handle or propagate. Fatal: panic!. Unrecoverable. Debug assert! for assertions. Unwrap in tests. Production: no panics.
+
+Q: What's ok_or_else?
+A: Converts Option to Result. ok_or_else(closure). Called if None. Lazy evaluation. Different errors per call. Computation only if needed. Performance advantage.
+
+Q: How do I debug Result unwraps?
+A: #[must_use] attribute warning. unwrap_or_else with logging. Custom error Display impl. Backtrace collection. RUST_BACKTRACE env var. println! debug. Debugger inspection.
+
+Testing Advanced
+
+Q: How do I test concurrent code?
+A: loom crate for race detection. Exhaustive exploration. Limited iterations. Stress testing. Property-based concurrent. arc/mutex patterns. Ordering verification. Data race detection.
+
+Q: What's quickcheck?
+A: Property-based testing. Random input generation. Shrinking. Minimal failing example. Test invariants. Not example-based. Comprehensive coverage. Edge case discovery.
+
+Q: How do I mock network calls?
+A: mockito crate. mock server. HTTP mocking. httptest crate. testcontainers for services. Integration test. Real services in CI. Test reliability.
+
+Q: How do I test panics?
+A: #[should_panic] attribute. panic message matching. Expected panic. Test harness catches. Verifies expected behavior. Negative testing. Failure modes.
+
+Q: What's test fixtures?
+A: Reusable test setup. Common data. Database seeding. Temporary files. fixtures crate. Shared state. Cleanup guaranteed. Test isolation. Determinism.
+
+Performance and Optimization
+
+Performance and Optimization
+
+Q: How do I profile CPU usage in Rust?
+A: Use cargo flamegraph which wraps perf on Linux or dtrace on macOS to generate an interactive flame graph SVG. First add a bench or binary target, then run cargo flamegraph --bin myapp. The flame graph shows which functions consume the most CPU time. Always profile in release mode with debug symbols kept: add debug = true under [profile.release] in Cargo.toml.
+
+Q: How do I avoid unnecessary allocations in hot paths?
+A: Identify allocations with dhat or heaptrack. Common sources: String formatting with format!, Vec growing without pre-sizing, temporary collect() calls. Fixes: use write! into a pre-allocated buffer, use Vec::with_capacity, use iterators without collecting, use Cow<str> to avoid clones when the input is already owned.
+
+Q: How do I inline functions for performance?
+A: #[inline] hints the compiler to inline but does not guarantee it. #[inline(always)] forces inlining, useful for tiny hot functions where call overhead matters. #[inline(never)] prevents inlining to reduce code size or improve profiler readability. Generic functions are inlined by default through monomorphization. Measure with benchmarks before adding inline attributes.
+
+Q: How do I use SIMD in Rust?
+A: std::arch provides platform-specific intrinsics under #[cfg(target_arch)]. The std::simd module (portable_simd, nightly) provides a portable API. For stable code, use the packed_simd2 or wide crates. Auto-vectorization via LLVM handles many cases without explicit SIMD if the loop is simple and bounds checks are eliminated.
+
+Q: How do I reduce memory allocator pressure?
+A: Use bumpalo for arena allocation where many objects share the same lifetime. Use SmallVec or tinyvec for small collections that usually fit on the stack. Pool frequently allocated objects. Consider replacing the global allocator with jemallocator for better multi-threaded performance and reduced fragmentation.
+
+Macros
+
+Q: How do I write a declarative macro with macro_rules!?
+A: Define patterns and corresponding expansions. macro_rules! my_macro { ($x:expr) => { println!("{}", $x); }; }. Fragment specifiers: expr for expressions, ident for identifiers, ty for types, tt for any token tree, block for code blocks. Use * for zero-or-more repetition, + for one-or-more. Macros are hygienic: generated identifiers do not collide with caller scope.
+
+Q: When should I write a procedural macro instead of macro_rules!?
+A: When you need to inspect or transform Rust syntax trees, generate complex code from annotations, or implement custom derive. proc-macro functions receive a TokenStream and return a TokenStream. Use the syn crate for parsing and quote! for generating. Custom derive macros implement behavior for #[derive(MyTrait)] without any runtime cost.
+
+Q: How do I debug macros?
+A: cargo expand shows the fully expanded output of all macros in a file. Install with cargo install cargo-expand. Add --lib, --bin, or a module path to scope the output. For macro_rules! debugging, add eprintln! calls inside the macro body. For proc-macros, write unit tests that take TokenStream strings and assert on the output.
+
+Q: What is macro hygiene?
+A: Hygiene prevents macro-introduced identifiers from interfering with identifiers in the caller's scope. In macro_rules!, a variable defined inside a macro body is in a separate hygiene scope: it cannot be referenced from the caller even if it has the same name. This prevents accidental captures. Proc-macros are not automatically hygienic; use quote!'s quasi-quoting to get hygiene via Span::call_site() or Span::def_site().
+
+Concurrency
+
+Q: What are the differences between std::sync::Mutex and parking_lot::Mutex?
+A: parking_lot::Mutex is faster, smaller, and does not poison on panic. std::sync::Mutex poisons itself when a thread panics while holding the lock, requiring unwrap() or error handling on every lock() call. parking_lot skips this and panics explicitly if you need that behavior. parking_lot also provides fair scheduling options and a try_lock_for method.
+
+Q: How do I avoid deadlocks in Rust?
+A: Enforce consistent lock ordering across all code paths that acquire multiple locks. Use scoped locking to release locks as early as possible. Prefer message passing via channels over shared locks for complex coordination. The loom crate provides a deterministic concurrency testing framework that exhaustively explores thread interleavings and detects deadlocks in tests.
+
+Q: How does work stealing in Tokio work?
+A: Tokio's multi-thread runtime assigns each worker thread a local task queue. When a worker runs out of tasks, it steals tasks from the back of another worker's queue. This achieves load balancing without a central queue bottleneck. The result is high CPU utilization under varying workloads. The current_thread runtime uses a single queue with no stealing.
+
+Q: What is a Condvar and when do I use it?
+A: std::sync::Condvar lets a thread wait for a condition while releasing a Mutex. Pattern: lock mutex, check condition in a loop, call condvar.wait(guard) to atomically release the lock and sleep, wake on condvar.notify_one() or notify_all(). Use when threads need to wait for a state change rather than polling. parking_lot provides a more ergonomic version.
+
+Q: How do I share a large immutable dataset across many threads efficiently?
+A: Arc<T> with T: Sync. All threads read the same heap-allocated data via reference counting. Clone of Arc is cheap (atomic increment). For static data known at compile time, a &'static T is even cheaper (no reference counting at all). Use OnceLock<T> to initialize a global value exactly once in a thread-safe way.
+
+Q: How do I pass closures between threads?
+A: The closure must be Send + 'static. move captures ownership of variables. Captured types must themselves be Send. Box<dyn Fn() + Send + 'static> stores closures of different types with the same signature. std::thread::spawn and tokio::spawn both require Send + 'static. If a type is not Send, you cannot move it into a spawned thread.
+

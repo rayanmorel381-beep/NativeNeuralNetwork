@@ -1,0 +1,278 @@
+Rust Standard Library and System Programming Documentation
+
+Core Language Primitives and Type System
+
+
+Primitive Types and Type Safety
+
+Rust's type system provides compile-time verification of program correctness. Scalar types include integers (i8, i16, i32, i64, i128, u8, u16, u32, u64, u128), floating-point numbers (f32, f64), booleans (bool), and characters (char). Each type has specific range and precision guarantees. Overflow behavior depends on build mode: debug builds panic, release builds wrap.
+
+Compound types group values together. Tuples group heterogeneous values of fixed length. Structs organize named fields. Enums represent variants with optional associated data. Arrays store homogeneous values with compile-time known length. Slices represent dynamically-sized views into arrays without ownership. Slices enable algorithms working on sequences regardless of backing storage.
+
+Type inference determines types from usage context, reducing explicit annotations. The type checker proves type safety properties at compile time. Generic types defer specialization to monomorphization time. Trait bounds constrain generic type parameters, ensuring compile-time polymorphism. Turbofish syntax ::<T> forces explicit type parameters when inference fails.
+
+
+String and Text Processing
+
+String represents owned, mutable UTF-8 text on the heap. String::new creates empty strings; String::from constructs from &str. String implements Deref<Target=str>, providing automatic conversions. String::push_str(s) appends a string slice. String::push(c) appends a single character. The chars iterator yields Unicode scalar values. The bytes iterator yields raw bytes. UTF-8 encoding complexity means indexing strings by byte position requires unsafe or iterator patterns.
+
+&str is an immutable UTF-8 string slice. String literals are &'static str, their data compiled into the binary. Creating &str from String requires borrowing: &my_string. String slices work with str methods without copying. The split iterator divides strings by patterns; split_whitespace separates by whitespace. The lines iterator processes text line-by-line. Pattern matching on &str enables sophisticated text processing. String contains and starts_with check membership.
+
+Formatting combines values into strings ergonomically. format! returns String with formatted output. println! prints to stdout with newline. print! prints without newline. write! and writeln! output to arbitrary Writers. Format specifiers control output appearance. The Display trait provides default formatting; Debug provides developer-oriented formatting. {} uses Display, {:?} uses Debug, {:#?} pretty-prints.
+
+
+Collections and Container Types
+
+Vec<T> provides growable arrays with contiguous storage. Allocation occurs on the heap; capacity grows exponentially. push() appends with amortized O(1) cost. pop() removes and returns the last element. get() safely indexes with Option. Direct indexing with [i] panics on out-of-bounds. Iteration is idiomatic with for-in loops. Destructuring unpacks vec elements. collect() consumes iterators building collections from their output.
+
+HashMap<K, V> provides efficient key-value storage with average O(1) lookup and insertion. Hashing determines bucket placement. Collisions chain within buckets. Iterating yields key-value pairs in arbitrary order. Mutable iteration enables in-place modification. The Entry API enables efficient conditional insertion and updates. insert() and get() are the core operations.
+
+HashSet<T> maintains unique values without associated data. Set operations like union, intersection, and difference combine sets efficiently. Checking membership with contains() is O(1) average. Iteration yields values in arbitrary order. Retain filters values in-place.
+
+BTreeMap<K, V> maintains ordered key-value pairs. Iteration is sorted by key. Range queries efficiently return subsets of entries using range(). BTreeSet<T> maintains ordered unique values. B-tree structure balances memory efficiency against search efficiency. BTreeMap performs better with large datasets and range queries.
+
+Linked lists are available but rarely recommended. VecDeque<T> provides efficient double-ended operations, pushing and popping from both ends. Standard library collections document performance characteristics precisely. Most algorithms should prefer Vec or arrays for cache efficiency.
+
+
+Smart Pointers and Memory Management
+
+Box<T> provides heap allocation. Boxing enables recursive types, trait objects, and moving large values. Box dereferences automatically to T. Boxing has zero runtime cost beyond allocation and indirection. Box::leak converts to &'static T permanently, useful for static initialization.
+
+Rc<T> enables reference counting for shared ownership. Multiple Rc pointers reference the same value. When the last Rc drops, the value is freed. Rc requires single-threaded contexts. Rc::clone increments the reference count without deep copying. Rc::strong_count queries active references. Cycles prevent deallocation; Weak prevents cycles.
+
+Arc<T> is thread-safe reference counting. Arc<T> implements Send and Sync if T does. Arc::clone works across thread boundaries. Arc<Mutex<T>> enables shared mutable state between threads. Arc<RwLock<T>> allows multiple concurrent readers or exclusive writers.
+
+Weak<T> creates non-owning references to Rc or Arc values. Weak references prevent cycles from preventing deallocation. Weak::upgrade returns Option<Rc<T>> or Option<Arc<T>>. Cycles of strong references cause memory leaks; Weak prevents this.
+
+Cell<T> provides interior mutability for Copy types with zero overhead. RefCell<T> enforces borrow rules at runtime, panicking on violations. UnsafeCell<T> provides interior mutability without checks for unsafe code.
+
+
+Iterators and Functional Programming
+
+Iterators provide lazy, chainable transformations over sequences. iter() borrows elements immutably. iter_mut() borrows elements mutably. into_iter() consumes the collection. Custom iterators implement Iterator trait. The next() method yields elements; returning None ends iteration.
+
+Adapter methods transform iterators without consuming them. map() transforms each element according to a closure. filter() keeps elements satisfying predicates. take() limits iteration length to n elements. skip() omits initial n elements. flatten() chains nested iterators. zip() pairs elements from multiple iterators.
+
+Consuming methods exhaust iterators producing results. collect() builds collections from iterators. sum() and product() accumulate values. any() and all() check predicates. find() returns first match. fold() and reduce() accumulate values with operations. count() yields the iteration length.
+
+Closures capture environment variables enabling functional programming patterns. move closures transfer captured variables into the closure. Fn traits describe closure behavior. Fn closures take immutable references. FnMut closures take mutable references. FnOnce closures consume captured values.
+
+
+Error Handling and Recovery
+
+Result<T, E> represents success with T or failure with E. Ok(T) variant holds success values. Err(E) variant holds errors. The ? operator propagates errors, returning Err if encountered. unwrap() panics on Err. unwrap_or() provides defaults. map() and and_then() transform results.
+
+Option<T> represents Some(T) or None, eliminating null pointer bugs. Some variant holds a value. None represents absence. Option methods include map(), filter(), and_then(), and unwrap(). is_some() and is_none() query variants.
+
+Custom error types implement the Error trait. Display provides user-facing messages. Debug provides developer diagnostics. source() chains errors revealing root causes. From implementations enable ergonomic conversion to error types.
+
+Panic is for unrecoverable programmer errors. panic! immediately unwinds the stack. catch_unwind enables panic recovery in limited contexts. PanicInfo captures panic details. Most code should use Result for error handling.
+
+
+File I/O and System Operations
+
+File::open opens files for reading or writing. Options control open behavior: create() creates if missing, truncate() clears, append() opens for appending. FileMetadata queries permissions, size, and timestamps. Reading fills buffers with bytes. Writing sends bytes to files.
+
+BufReader and BufWriter buffer I/O, reducing system calls. read_line() reads until newline. read_to_string() reads entire files into strings. write_all() writes complete buffers. flush() ensures buffered data reaches files immediately.
+
+Path and PathBuf handle platform-specific path syntax. Component parsing handles .. and . correctly. Metadata queries file properties. Permissions control access. Traversing directories uses read_dir() for directory contents and WalkDir for recursive traversal.
+
+Command spawns OS processes. stdin(), stdout(), stderr() control subprocess I/O. wait() blocks until completion. output() captures stdout and stderr. Pipes connect subprocess I/O. Environment variables pass configuration.
+
+
+Concurrency and Synchronization
+
+std::thread::spawn creates OS threads. JoinHandle waits for thread completion. Panics in threads are contained; they don't crash the program. Closures with move keyword transfer ownership to threads, making cross-thread data sharing safe.
+
+Channels enable message passing. Sender sends values; Receiver gets values. mpsc (multi-producer, single-consumer) channels allow multiple senders. crossbeam provides additional channel types. Sending transfers ownership preventing data races. Channels disconnect when all senders drop, making receiver::recv() return Err.
+
+Mutex<T> provides mutual exclusion. lock() blocks until the lock is acquired. MutexGuard enforces that T is accessed only while holding the lock. Lock guards release automatically when dropped. Deadlocks occur with improper locking order.
+
+RwLock<T> allows multiple readers or a single writer. read() acquires read locks. write() acquires write locks. Readers don't block each other. Writers have exclusive access.
+
+Atomic types enable lock-free synchronization. AtomicBool, AtomicU32, and similar provide atomic operations. compare_and_swap enables conditional updates. Ordering controls memory ordering (Relaxed, Release, Acquire, SeqCst).
+
+
+Unsafe Code and Foreign Function Interfaces
+
+Unsafe blocks bypass borrow checking. Raw pointers (*const T, *mut T) require explicit dereferencing. Dereferencing invalid pointers causes undefined behavior. Pointer arithmetic bypasses bounds checks.
+
+Unsafe functions require unsafe calls. Calling C functions requires extern "C" blocks. Function signatures must match C declarations precisely. Arguments marshal between Rust and C types. Return values convert similarly.
+
+bindgen automates generating Rust bindings from C headers. bindgen parses C code emitting Rust FFI declarations. Custom behavior adjusts bindings. Wrapper types improve safety.
+
+Null pointers in C map to Option in Rust. Opaque C types become void pointers. Callbacks require function pointers or trait objects. Memory ownership crosses language boundaries carefully.
+
+
+Macros and Meta-programming
+
+macro_rules! defines declarative macros. Patterns match token streams. Expansion replaces patterns with generated code. Repetition operators (+, *, ?) match one or more, zero or more, or zero-or-one occurrences. Hygiene prevents macro-generated names conflicting.
+
+Procedural macros are functions receiving and producing token streams. Derive macros auto-implement traits. Attribute macros transform decorated items. Function-like macros resemble function calls in macro position. The proc_macro crate provides APIs.
+
+Recursive macros repeatedly expand. Macro debugging uses cargo expand to see generated code. Complex macros leverage helper attributes. Documentation macros prevent cryptic error messages.
+
+Advanced Type System Features
+
+Trait bounds constrain generic types. where clauses specify bounds readably. Multiple trait bounds require all implementations. Lifetime bounds relate lifetime parameters. Self types in traits enable CRTP patterns.
+
+Associated types reduce generic parameter proliferation. Iterator::Item is an associated type. Trait bounds reference associated types. Default associated types simplify common cases. Associated type bounds constrain implementations.
+
+Higher-ranked trait bounds handle universal quantification over lifetimes. for<'a> syntax indicates bounds holding for all lifetimes. Callback types often use HRTB. The Fn trait uses HRTB for all borrow lifetimes.
+
+Variance describes when subtypes substitute for supertypes. Covariance allows subtypes in contravariant positions. Contravariance allows supertypes in covariant positions. Invariance prohibits substitution. Generic parameters have intrinsic variance.
+
+
+Performance Optimization
+
+Zero-cost abstractions ensure abstractions compile to efficient code. Iterators compile to loops. Generics monomorphize specializing code for types. Inline annotations guide compiler decisions. Loop unrolling expands loops for cache efficiency.
+
+SIMD operations accelerate data-parallel computation. The packed_simd crate provides explicit SIMD types. Compiler auto-vectorization recognizes vectorizable loops. Custom SIMD code optimizes hot paths.
+
+Memory layout affects performance. Struct field ordering determines size and cache locality. Repr attributes control layout. Sparse data structures waste cache. Caching computed values amortizes repeated work.
+
+Profiling identifies bottlenecks. Flamegraph visualization reveals time consumption. Benchmarks measure small code sections. perf counters report cache behavior. Statistical profilers average overhead.
+
+Optional and Result Types - Option<T> represents presence or absence. Some(value) or None. Result<T, E> represents success or error. Ok(value) or Err(error). Unwrapping with .unwrap(). Pattern matching. Combinators for transformation.
+
+Collections Deep Dive - Vec<T> dynamic arrays. HashMap<K, V> key-value storage. BTreeMap sorted keys. HashSet uniqueness. LinkedList doubly-linked. VecDeque double-ended queue. Selection criteria. Performance characteristics.
+
+String Types - String heap-allocated owned. &str borrowed view. String::from allocation. Indexing complexity. Iteration by char. Byte operations. UTF-8 handling. Escape sequences. Raw strings. Formatting.
+
+Iterator Trait - Iterator interface. next() method. Lazy evaluation. Adapter methods. Consumer methods. collect(). Chaining operations. Parallel iterators. Custom iterators. Performance.
+
+Trait System Advanced - Trait definition. Trait bounds. Multiple traits. Blanket implementations. Trait objects. Object safety. Dynamic dispatch. Static dispatch. Performance trade-offs.
+
+Module System - Module hierarchy. File organization. pub visibility. pub(crate) scoping. pub(super) parent. Reexport patterns. use statements. Glob imports. Module privacy. Documentation.
+
+Macro System - Declarative macros. Procedural macros. Derive macros. Attribute macros. Function-like macros. Macro hygiene. Recursion limits. Debugging. Rule priority.
+
+Concurrency Primitives - Thread creation. Mutex<T> mutual exclusion. RwLock<T> read-write. Arc<T> atomic reference count. Channels. Crossbeam queue. Parking_lot efficiency. Performance considerations.
+
+Error Handling - panic! unrecoverable errors. Result<T, E> recoverable. Option<T> values. ? operator. Custom error types. Error traits. thiserror derive. Error chains. Debugging.
+
+Testing Framework - #[test] attribute. cargo test runner. Assertions. Panics as failures. Ignored tests. Doc tests. Integration tests. Unit tests. Test organization. Coverage tools.
+
+Memory Safety - Stack vs heap. Ownership transfer. Borrowing. Lifetimes. Mutable vs immutable. Dereferencing. Automatic deref coercion. Null reference prevention. Use-after-free prevention.
+
+Generic Programming - Generic functions. Generic structs. Generic traits. Type constraints. Where clauses. Associated types. Specialization. Monomorphization. Performance implications.
+
+Unsafe Code - unsafe blocks. Raw pointers. Dereferencing. Pointer arithmetic. Type casting. Mutable statics. FFI calls. Documenting invariants. Verification techniques. Performance implications.
+
+Standard Library Overview - Core types. Collections. I/O operations. File handling. Environment variables. System time. Hashing. Formatting. Algorithms. Iterators. Error handling.
+
+Advanced Topics - FFI binding generation. Code generation procedural macros. Custom derive macros. Serialization frameworks. Parser combinators. Database drivers. Web frameworks. Async runtimes.
+
+Advanced Pattern Matching - Complex destructuring. Nested patterns. Guard expressions. Arm ordering. Exhaustiveness checking. Multiple patterns per arm. Pattern alternatives. Irrefutable patterns.
+
+References and Pointers - Smart pointer types. Box, Rc, Arc, Mutex combinations. Raw pointers unsafe. Dereferencing coercion. Deref trait. Manual deref. Pointer arithmetic risks.
+
+Lifetime Annotations - Named lifetimes. Multiple lifetimes. Lifetime parameters. Elision rules three. Complex cases. Self referential. Higher-ranked bounds. Variance rules.
+
+Unsafe Code Patterns - When to use unsafe. Invariant documentation. Raw pointer dereferencing. Transmute dangers. FFI safety. Extern functions. Linking requirements.
+
+Trait Objects Deep Dive - Object safety requirements. Trait object size. Virtual dispatch overhead. Self-ish types. Casting between objects. Trait object creation. Limitations.
+
+Module Organization - File structure. Path declarations. visibility control. Reexporting. Prelude pattern. Nested modules. File module conventions. pub use patterns.
+
+Closure Lifetime Capture - Move semantics. Borrowed captures. Lifetime inference. Escaping closures. Lifetime parameters. FnOnce, Fn, FnMut. Mutable capture. Self borrowing.
+
+Macro Meta Information - #[meta] attributes. Compile-time computation. Conditional compilation. Feature flags. Platform detection. Debug assertions. Optimization level.
+
+Iterator Adapters Chain - Lazy evaluation. Chaining adapters. Memory efficiency. Type preservation. Composition benefits. Custom adapters. Iterator trait impl.
+
+Const Functions - Compile-time evaluation. Const generics parameter. Limited operations. Integer only current. Future expansion. Const evaluation. compile_error! macro.
+
+Generic Constraints - Type bounds. Multiple bounds. Trait objects. Associated types. Where clauses. Phantom types. Default bounds. Variance control.
+
+Procedural Derives - Custom #[derive]. TokenStream processing. quote! expansion. Attribute access. Error handling. Compile errors. Testing generation.
+
+Visibility Boundaries - pub public. private default. pub(crate) module. pub(super) parent. pub(in path). Structural hiding. API boundaries. Encapsulation.
+
+Type Aliases - type Name = Type. Semantic clarity. Generic aliases. Self-referential. Limitations. Transparent newtype. Type synonyms. Clarity vs verbosity.
+
+Conditional Compilation - #[cfg] gates. cfg! macro. target_os specifics. feature gates. debug_assertions. test attribute. Conditional modules. Build time flags.
+
+Impl Blocks Flexibility - Multiple impl blocks. Trait impl conditional. Generic impl multiple. Blanket implementations. Specialization future. impl patterns. Organization.
+
+Method Dispatch - Receiver types. self/&self/&mut self. move semantics. Auto deref. Deref coercion. Method call sugar. Explicit path call. UFCS syntax.
+
+Ownership Semantics Advanced - Move vs copy. Impl Copy trait. Clone trait. Bitwise copy. Drop interaction. Memory layout. Reference semantics.
+
+Error Propagation Patterns - ? operator sugar. Explicit match. Error conversion. From implementations. Error types. Stack trace building. Context layers.
+
+Resource Management - RAII enforcement. Drop trait determinism. Panic-safe cleanup. Scope exit guarantee. Multiple resources. Order matters. Cleanup guarantee.
+
+Advanced Lifetimes - Lifetime parameters explicit. Named lifetimes. Lifetime elision rules. Multiple lifetimes. Lifetime constraints. Self lifetime. Struct field lifetimes. Lifetime variance. Covariance. Contravariance. Invariance. Lifetime bounds. Where clause. Higher-ranked bounds.
+
+Generic Programming Advanced - Generic functions. Generic structs. Generic traits. Trait bounds. Multiple bounds. Associated types. Associated consts. Const generics. Where clauses. Type inference. Turbofish syntax. Specialization. Blanket implementations.
+
+Error Handling Patterns - Result type. Ok and Err. ? operator. match expressions. if let patterns. unwrap and expect. map and and_then. ok_or and ok_or_else. Error trait. Display impl. From implementations. Error conversion. Error chaining.
+
+
+Standard Library: Collections
+
+Vec<T> is the primary growable array. push() appends, pop() removes from end in O(1). insert(i, v) and remove(i) are O(n). capacity() reports allocated space; reserve() preallocates. retain(|x| condition) removes elements in-place. dedup() removes consecutive duplicates. extend(iter) appends from any iterator.
+
+HashMap<K, V> provides O(1) average lookups. get(&key) returns Option<&V>. entry(key).or_insert(v) inserts if absent and returns &mut V. iter() yields (&K, &V) pairs in arbitrary order. keys(), values() iterate subsets. with_capacity(n) preallocates buckets.
+
+BTreeMap<K, V> maintains sorted order, O(log n) operations. Useful when you need range queries: map.range(lo..hi) or sorted iteration. BTreeSet<K> is the set equivalent.
+
+HashSet<T> and BTreeSet<T> maintain unique elements. contains() checks membership. intersection(), union(), difference() return iterators.
+
+VecDeque<T> is a double-ended queue. push_front/pop_front and push_back/pop_back all O(1) amortized. Useful for BFS or sliding windows.
+
+Standard Library: I/O
+
+std::fs::read_to_string(path) reads entire file as String. fs::read(path) reads as Vec<u8>. fs::write(path, data) writes bytes or string. OpenOptions provides fine-grained control: append, create, truncate.
+
+BufReader<R> wraps a reader with a buffer, making read_line() and lines() efficient. BufWriter<W> batches write calls. For large files always use buffered I/O.
+
+std::io::stdin().read_line(&mut buf) reads interactive input. io::stdout().flush() forces output before reading. Stdin implements BufRead so lines() works on it too.
+
+Standard Library: String Operations
+
+String::from("text"), "text".to_string(), and format!("...") all produce owned String. s.push_str("more") appends &str. s.push('c') appends a char. s.contains("sub"), s.starts_with("pre"), s.ends_with("suf") check substrings. s.replace("old", "new") returns a new String. s.split(',') yields an iterator of &str slices. s.trim() strips leading/trailing whitespace. s.to_uppercase() and s.to_lowercase() return new Strings.
+
+Parsing: "42".parse::<i32>() returns Result<i32, ParseIntError>. The turbofish or type annotation is required because parse is generic.
+
+Standard Library: Option and Result
+
+Option<T> has methods: map(f) transforms Some(v) to Some(f(v)), unwrap_or(d) falls back to d on None, and_then(f) chains Option-returning functions, filter(p) returns None if predicate is false, flatten() reduces Option<Option<T>> to Option<T>.
+
+Result<T, E> methods: map(f) transforms Ok, map_err(f) transforms Err, ok() converts to Option, err() gets the error as Option, and_then(f) chains fallible operations, unwrap_or_else(|e| ...) provides a fallback.
+
+Combinators: Option::zip(other) pairs two Options into Option<(A, B)>. Iterator::filter_map(f) applies a function returning Option and keeps Some values.
+
+Standard Library: Iterators
+
+Key adapters: map(f), filter(p), flat_map(f), take(n), skip(n), take_while(p), skip_while(p), chain(iter), zip(iter), enumerate(), peekable(), rev() (requires DoubleEndedIterator).
+
+Consumers: collect::<Collection>(), sum(), product(), count(), fold(init, f), reduce(f), min(), max(), min_by_key(f), max_by_key(f), find(p), position(p), any(p), all(p), for_each(f).
+
+Creating iterators: iter() borrows, iter_mut() mutably borrows, into_iter() consumes. Ranges: (0..10), (0..=10). std::iter::once(v) wraps a single value. std::iter::repeat(v) repeats forever. std::iter::from_fn(|| ...) generates from a closure.
+
+Standard Library: Traits Reference
+
+Display (std::fmt::Display): Implement for user-facing formatting. Used by println!("{}", v). Requires write!(f, "...", ...) in fmt method. Debug (#[derive(Debug)]): Used by {:?}. Auto-derived for most types. Default: Provides a default value, derived for common types. Clone: Explicit deep copy via .clone(). Copy: Implicit bitwise copy, only for stack types. From/Into: Type conversions; implementing From<A> for B auto-provides Into<B> for A.
+
+PartialEq/Eq: == operator. PartialOrd/Ord: <, >, <=, >=. Hash: Required for HashMap keys. Iterator: Enables for loops and adapter methods. Deref: Enables smart pointer coercions. Drop: Customizes cleanup on scope exit.
+
+Standard Library: Thread Spawning
+
+std::thread::spawn(f) takes a 'static + Send closure, returns JoinHandle<T>. handle.join() blocks until completion and returns thread's return value wrapped in Result (Err if thread panicked).
+
+thread::scope(|s| { s.spawn(|| { /* can borrow locals */ }); }) allows spawning non-'static threads that can borrow from the enclosing scope. The scope blocks until all spawned threads finish.
+
+thread::sleep(Duration::from_millis(100)) sleeps the current thread. thread::current().id() returns the current thread's identity.
+
+Standard Library: Synchronization
+
+Mutex<T>: lock() blocks until lock is acquired, returning MutexGuard<T> that derefences to &mut T. The guard automatically unlocks on drop. try_lock() returns Err immediately if locked.
+
+RwLock<T>: read() allows multiple concurrent readers. write() requires exclusive access. Neither starves the other in fair implementations.
+
+Condvar: Used with Mutex for condition-based waiting. wait(guard) atomically releases the mutex and sleeps. notify_one() or notify_all() wakes waiters. Used for producer-consumer patterns.
+
+std::sync::atomic: AtomicBool, AtomicUsize, AtomicI32 etc. Operations: load(Ordering), store(v, Ordering), fetch_add(v, Ordering), compare_exchange(old, new, succ_ord, fail_ord). Ordering::SeqCst is safest, Relaxed is fastest but requires careful reasoning.
+

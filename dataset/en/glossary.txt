@@ -1,0 +1,300 @@
+Rust Terminology and Glossary
+
+Arc: Atomic Reference Counting. Thread-safe shared ownership pointer. Multiple Arc clones reference same data. Last Arc drop frees data. Pairs with Mutex for shared mutable state.
+
+Borrow: Temporary access to value without ownership transfer. Immutable (&T) or mutable (&mut T). Rules enforced by borrow checker.
+
+Borrow Checker: Compiler subsystem enforcing borrowing rules. Prevents data races at compile-time. Complex lifetime tracking. Zero-cost enforcement.
+
+Box: Heap allocation wrapper. Enables recursion by breaking size cycles. Trait object container. Derefs automatically to contained type.
+
+Closure: Function-like value capturing environment. Fn, FnMut, FnOnce traits. move keyword transfers captures. Implicit type parameters.
+
+Crate: Compilation unit. Library or binary. Published on Crates.io. Cargo manages dependencies between crates.
+
+Derive: Automatic trait implementation via macros. #[derive(Debug, Clone)] generates boilerplate. Works with built-in and custom derives.
+
+Dyn: Dynamic trait object. dyn Trait reference. Runtime polymorphism. Dispatches through vtable. Slower than static dispatch.
+
+Enum: Sum type with named variants. Each variant can have associated data. Pattern matching extracts variants. Enums enable type-safe unions.
+
+FFI: Foreign Function Interface. Calling C libraries from Rust. bindgen automates binding generation. Unsafe blocks required for FFI.
+
+Generic: Parameterized types and functions. Monomorphization specializes code per type. Zero-cost abstraction. Compile-time polymorphism.
+
+Lifetime: Duration for which reference remains valid. 'a parameter. Borrow checker tracks and verifies. Prevents dangling pointers.
+
+Macro: Compile-time code generation. macro_rules! pattern-based expansion. Procedural macros for custom syntax. Metaprogramming capability.
+
+Ownership: Each value has one owner. Moving transfers ownership. Borrowing creates references. Dropping frees resources when scope ends.
+
+Panic: Unrecoverable error. panic! macro initiates unwinding. Immediately unwinds stack. Catches in tests. Opt-in handling with catch_unwind.
+
+Pattern Matching: Destructuring with exhaustive checking. match expr. Pattern guards with if. Compiler verifies exhaustiveness.
+
+Rc: Reference Counting. Single-threaded shared ownership. Multiple Rc pointers reference same data. Last Rc drop frees data.
+
+Slice: Dynamically-sized contiguous view into array. [T] type without size. &[T] borrows slice. Enables generic array algorithms.
+
+Struct: Named grouping of fields. Similar to records or classes. impl block adds methods. Associated functions with ::.
+
+Trait: Interface defining behavior. Types implement traits. Trait bounds constrain generics. Trait objects for dynamic dispatch.
+
+Type System: Compile-time verification of program correctness. Prevents entire classes of runtime bugs. Generic and concrete types. Expression-based.
+
+Unsafe: Code bypassing normal safety checks. Raw pointers allowed. FFI calls possible. Unsafe functions require careful documentation. Responsibility on programmer.
+
+Vec: Growable dynamic array. Heap-allocated contiguous storage. O(1) amortized push. Implements Deref enabling slice operations.
+
+Visibility: pub for public. Private by default. pub(crate) for crate visibility. pub(super) for parent module. Re-exporting with pub use.
+
+Monomorphization: Specializing generic code for each type. Compiler generates specialized binary code per type. Zero-cost abstraction. Code duplication.
+
+Iterator: Lazy sequences of values. iter(), iter_mut(), into_iter() variants. Adapters chain operations. Consumers exhaust iterators.
+
+Result: Enum representing success or failure. Ok(T) variant for success. Err(E) variant for failure. ? operator propagates errors.
+
+Option: Enum representing Some(T) or None. Eliminates null pointers. Pattern matching extracts value. Methods: map, filter, and_then.
+
+Async: Asynchronous programming with futures. .await suspends on I/O. async fn creates future-returning function. Runtime schedules execution.
+
+Await: Suspends execution until future completes. .await syntax within async. Compiled to state machine. No blocking threads.
+
+Future: Value that may not exist yet. Represents eventual completion. Combines with async-await. Compiled to state machines.
+
+Async/Await: Keywords enabling concurrent programming. async fn creates future. .await suspends execution. Runtime schedules and resumes futures. Enables millions of concurrent tasks.
+
+Attribute: Metadata annotation for items. #[derive(Debug)] auto-implements Debug. #[test] marks test functions. #[cfg(test)] conditional compilation.
+
+Attribute Macro: Procedural macro acting as attribute. #[my_macro] above items. Transforms decorated item. Returns modified code.
+
+Bindings: Variable assignments. let x = 5 binds name to value. Mutable bindings: let mut x. Destructuring bindings extract multiple values.
+
+Borrowing Rules: Core safety principle. One mutable borrow OR many immutable borrows. Mutable borrows have exclusive access. Immutable borrows share read access.
+
+Casting: Type conversion. as keyword: let x = 5 as f64. Between numeric types. Pointer casting. Raw pointer conversions.
+
+Const: Compile-time constant. const X: u32 = 5. Evaluated at compile-time. Inlined everywhere. Used in type-level computation.
+
+Derive Macro: Automatically implements traits. #[derive(Clone, Debug, Default)]. Works with many traits. Saves boilerplate code.
+
+Drop: Cleanup when binding goes out of scope. Called automatically. Frees resources. Destructors. Deterministic cleanup.
+
+Early Return: ? operator or return statement. Exits function immediately. ? propagates errors. return val exits with value.
+
+Enum: Algebraic data type. Sum types. Variants with optional data. Pattern matching extracts. Type-safe unions.
+
+Exhaustive: Pattern matching must handle all cases. Compiler verifies. Prevents missing arms. Safety guarantee.
+
+Expression: Computation returning value. Last expression is return value. No semicolon needed. Statements don't return.
+
+Field: Named part of struct. struct User { name: String, age: u32 }. Accessed with dot notation: user.name.
+
+Format String: Template for output. println!("Hello {}", name). Placeholders: {}, {:?}, {:#?}. Arguments follow format.
+
+Function Pointer: Raw function address. fn(i32) -> bool type. Used in callbacks. Lower level than closures.
+
+Guard: Pattern matching condition. match val { Some(x) if x > 0 => {...} }. if after pattern. Additional filtering.
+
+Higher Order: Functions taking or returning functions. Callbacks. Closures. Generic over function types.
+
+Hygiene: Macros don't collide with names. Macro-generated names prefixed. Prevents conflicts. Safety feature.
+
+Interior Mutability: Mutation through immutable reference. RefCell<T>, Cell<T>. Runtime borrow checking. Single-threaded use.
+
+Intrinsic: Low-level CPU operation. unsafe intrinsics::_mm_add_epi32. Direct hardware access. Performance critical.
+
+Invariant: Condition that must always hold. Unsafe code documents invariants. Safe code must maintain. Contracts.
+
+Keyword: Reserved word. fn, let, mut, pub, impl, trait, etc. Cannot be used as identifiers. Language defined.
+
+Laziness: Operations defer until needed. Iterators lazy. No intermediate allocations. Performance optimization.
+
+Lexical Scope: Where binding is valid. Determined by braces. Local to functions. Global for module-level.
+
+Lvalue: Left-hand side of assignment. Variable that can be assigned. Mutable bindings. Must be valid target.
+
+Mutable: Can change value. let mut x = 5; x = 10 is valid. Mutable borrows &mut T. Mutable references.
+
+Namespace: Scope for names. Modules create namespaces. use imports from namespaces. Path::to::item references.
+
+Newtype: Type wrapper. struct UserId(u32). Prevents mixing types. Type safety. Compile-time guarantees.
+
+Null: No value. Rust replaces with Option<T>. None represents absence. Some(T) holds value. No null pointer dereferences.
+
+Opaque: Hidden implementation. Trait objects opaque. impl Trait opaque. Return type not revealed. Implementation detail.
+
+Pattern: Template for destructuring. match arms patterns. Function parameters patterns. Exhaustive checking.
+
+Phantom: Zero-size type marker. PhantomData<T>. Variance. Ownership. Type parameters without storage.
+
+Pointer: Memory address. Raw pointers: *const T, *mut T. Smart pointers: Box, Rc, Arc. Dereference with *.
+
+Precision: Floating-point accuracy. f32 single precision. f64 double precision. Loss of precision possible. Rounding errors.
+
+Privacy: Control visibility. pub public. private default. pub(crate) crate-level. pub(super) parent module.
+
+Raw String: Literal without escapes. r"text\with\backslashes". r#" handles quotes. Raw byte string: br"...".
+
+Receiver: First parameter of method. self, &self, &mut self. Determines how self is consumed. Affects ownership.
+
+Recursion: Function calling itself. Base case required. Stack usage. Tail call optimization. Mutual recursion.
+
+Reference: Borrow without ownership. &T immutable. &mut T mutable. Automatic dereferencing. * dereferences explicitly.
+
+Repr: Memory representation. #[repr(C)] C-compatible layout. #[repr(u8)] for enums. FFI uses repr.
+
+Return: Exit function with value. return expr or last expression. Early return with return. Implicit in expressions.
+
+Scope: Region where binding is valid. Lexical scoping. Shadowing. Moves and borrows. Lifetime related.
+
+Self: Current type in impl. self, Self refer to type. Methods use self. Associated functions use Self.
+
+Shadowing: Rebinding name. let x = 5; let x = x + 1 shadows. Different type possible. New binding.
+
+Short Circuit: Operators stop early. && stops if false. || stops if true. Prevents unnecessary evaluation.
+
+Sized: Compile-time known size. Sized trait. ?Sized for dynamic sizes. Slices unsized. Trait objects unsized.
+
+Smart Pointer: Wrapper around pointer. Implements Deref and Drop. Box, Rc, Arc. Reference counting. Automation.
+
+Statement: Does not return value. let x = 5 is statement. Ends with semicolon. Expression becomes statement with ;.
+
+Static: Program lifetime storage. static X: u32 = 5. Initialized once. Thread-local possible. Mutable statics require unsafe.
+
+String Slice: View into UTF-8 text. &str type. No ownership. Can't modify. Efficient borrowing. "literal" is &'static str.
+
+Subtype: Type relationship. Covariance. Contravariance. Invariance. Substitutability. Generic variance rules.
+
+Suffix: Type hint on literal. 5u32 unsigned 32-bit. 5.0f64 float 64-bit. Helps disambiguation. Explicit typing.
+
+Syntax: Grammar rules. let bindings. Function definitions. Pattern matching. Expression statements.
+
+Target: Compilation target. x86_64-unknown-linux-gnu native. wasm32-unknown-unknown WebAssembly. Cross-compilation.
+
+Trait Bound: Constrains generic types. <T: Display> requires Display. Multiple bounds: <T: Clone + Debug>. Where clauses.
+
+Transmute: Reinterpret bytes. unsafe transmute between types. Extremely dangerous. Breaks all safety. Avoid.
+
+Triple: Target specification. target-cpu-os format. x86_64-pc-windows-gnu. Identifies compilation target precisely.
+
+Tuple: Fixed-length heterogeneous sequence. (i32, String, bool). Destructuring: let (x, y) = pair. Access with .0, .1.
+
+Type Family: Multiple types unified. Associated types. Generic parameters. Type-level computation. Kind system analog.
+
+Underscore: Ignore value. _ discards. _var disables warning. Pattern placeholder. Anonymous lifetime '_a.
+
+Unsize: Dynamic sized array conversion. &[T; 5] coerces to &[T]. Box<[T; 5]> coerces to Box<[T]>. Transparent.
+
+Unsafe: Bypasses safety checks. Programmer responsible. Raw pointers. FFI calls. Low-level operations. Document invariants.
+
+Valid: Memory accessible and initialized. Freed memory invalid. Stack variables after function invalid. Pointers must be valid.
+
+Variant: Choice in enum. enum Color { Red, Green, Blue }. Associated data possible. Pattern matched.
+
+Vector: Growable array. Vec<T>. Heap allocated. Contiguous. Reallocates on growth. Slice access: &v[..].
+
+Visibility: Public or private. pub public. private default. pub(crate) module scope. pub(super) parent scope.
+
+Lifetime Elision: Compiler infers lifetimes. Three rules eliminate annotations. Single parameter copied. &self rules. Complex cases explicit.
+
+Walk: Traverse tree or graph. Recursive functions. Iterator adapters. DFS/BFS implementations. Pattern matching.
+
+Well-Typed: Program satisfies type system. Type checker passes. Correct operations. Compile-time verification.
+
+Whitespace: Formatting in code. Ignored by compiler. Readability. Convention: 4-space indentation.
+
+Word: CPU-size integer. i64 on 64-bit. i32 on 32-bit. usize corresponds to word. Architecture dependent.
+
+Workable: Code compiles and runs. Type checks. Borrows valid. No panics expected. Production ready.
+
+Wrapper: Type containing another. struct Wrapper<T>(T). newtype pattern. Derives type safety. Zero cost.
+
+WASM: WebAssembly. Web target. Portable binary. Browser execution. wasm32-unknown-unknown target.
+
+Yielding: Giving control to scheduler. .await yields in async. Threads yield on sleep. Event loops process others.
+
+Zeroable: Safely initialized to zeros. bytemuck::Zeroable. Pod types. No unsafe needed. Default trait.
+
+Abort: Immediate program termination without cleanup. std::process::abort(). Differs from panic which unwinds.
+
+Associated Const: Constant defined within a trait or impl. const MAX: usize = 100. Accessed via Type::MAX.
+
+Blanket Impl: Trait implementation for all types satisfying a bound. impl<T: Display> Printable for T. Provides default behavior widely.
+
+Builder: Design pattern accumulating configuration before construction. Methods return Self. Final build() produces result.
+
+Const Fn: Function executable at compile-time. const fn add(a: i32, b: i32) -> i32 { a + b }. Enables const evaluation.
+
+Covariant: Type parameter where subtype relationship is preserved. &'long T is subtype of &'short T.
+
+Deref Coercion: Automatic &String to &str conversion. Compiler inserts deref calls. Makes APIs ergonomic.
+
+Discriminant: Integer tag identifying enum variant. std::mem::discriminant() retrieves it. Used in unsafe pattern matching.
+
+Drop Glue: Compiler-generated code calling Drop recursively. Ensures all nested values are dropped properly.
+
+DST: Dynamically Sized Type. Size unknown at compile-time. str, [T], dyn Trait. Must be behind a pointer.
+
+Existential Type: Type whose concrete form is hidden. impl Trait in return position. Compiler infers the actual type.
+
+Exhaustiveness: All possible cases handled. match must cover every variant. Compiler enforces. Non-exhaustive enums opt out.
+
+Fat Pointer: Two-word pointer carrying extra metadata. &[T] stores pointer + length. &dyn Trait stores pointer + vtable pointer.
+
+Feature Flag: Compile-time conditional. [features] in Cargo.toml. #[cfg(feature = "name")] gates code.
+
+Floor Division: Integer division truncates toward zero. Use / operator. For floor semantics: (a as f64 / b as f64).floor().
+
+GAT: Generic Associated Type. Associated type with its own generic parameters. type Item<'a>. Enables advanced abstractions.
+
+Global Alloc: Custom memory allocator. Implement GlobalAlloc trait. Register with #[global_allocator]. System-wide replacement.
+
+HRTB: Higher-Ranked Trait Bound. for<'a> Fn(&'a str). Bound holds for all lifetimes. Enables generic callbacks.
+
+Inlining: Compiler copies function body into call site. #[inline] hints. #[inline(always)] forces. Removes call overhead.
+
+LTO: Link-Time Optimization. Cross-crate optimization. [profile.release] lto = true. Slower compile, faster runtime.
+
+Monomorphization: Generic instantiation per concrete type. Each T generates code. Binary size grows with type count.
+
+Move Semantics: Transferring ownership. Assignment moves by default. Implements Drop, not Copy. Single-ownership enforced.
+
+MIR: Mid-level Intermediate Representation. Compiler internal IR. Used for borrow checking and optimization. Visible via --emit=mir.
+
+NLL: Non-Lexical Lifetimes. Lifetimes end when last used, not scope boundary. Enables more flexible borrow patterns.
+
+OnceLock: Lazy initialization cell. std::sync::OnceLock. Initializes exactly once. Thread-safe. Replaces lazy_static.
+
+Opaque Return Type: impl Trait in position. Concrete type hidden from caller. Zero-cost monomorphization preserved.
+
+Orphan Rule: Trait impls require local type or local trait. Prevents conflicting impls across crates. Coherence guarantee.
+
+Packed Struct: #[repr(packed)]. Removes alignment padding. Fields may be unaligned. Accessing requires copy or unsafe.
+
+Pinning: Prevents value from moving in memory. Pin<P>. Required for self-referential structs. Used in async state machines.
+
+Send: Trait marking type safe to transfer between threads. Auto-implemented. Raw pointers are !Send.
+
+Squash: Combining multiple commits into one. Git operation. Not a Rust concept; for documentation purposes.
+
+Stack Frame: Memory region for function locals. Allocated on call, freed on return. Rust values live here by default.
+
+Sync: Trait marking type safe to share between threads via references. &T: Send iff T: Sync. Auto-implemented.
+
+Turbofish: Explicit generic syntax. function::<Type>(). Disambiguates when inference fails. parse::<i32>() example.
+
+Two's Complement: Binary representation for signed integers. Overflow wraps. Defined in Rust. Avoids UB from C.
+
+Type Coercion: Implicit type conversion by compiler. &String to &str. &[T; N] to &[T]. Occurs at coercion sites.
+
+UB: Undefined Behavior. Operations with no defined semantics. Causes arbitrary behavior. Unsafe code must avoid.
+
+Variance: How subtype relationships propagate through generics. &'a T is covariant in 'a. &'a mut T is invariant in T.
+
+WASM: WebAssembly target. Compiles to portable binary format. Runs in browsers and WASI runtimes. wasm32-unknown-unknown.
+
+Witness Type: Proof carried as value. Often zero-sized. Proves a property at compile-time. Phantom type use case.
+
+Zero-Sized Type (ZST): Types with no memory representation. struct Marker; PhantomData<T>. Used for type-level information.
+

@@ -1,0 +1,311 @@
+Common Stack Overflow Questions About Rust
+
+Q: How do I convert String to &str?
+A: String deref coerces to &str automatically in most contexts. Explicit: &string or &string[..]. &String implements Deref<Target=str>.
+
+Q: Cannot move out of borrowed context?
+A: Values behind & can't move. Clone if needed. Use move closures: || { }. Redesign with ownership if restructurable.
+
+Q: Lifetime expected but not provided?
+A: Add explicit lifetime parameters. fn foo<'a>(x: &'a str) -> &'a str. Lifetime elision hides annotations in simple cases. Complex functions need explicit.
+
+Q: How do I share mutable state between threads?
+A: Arc<Mutex<T>> for shared mutable across threads. Rc<RefCell<T>> for single-threaded. Channels for message passing.
+
+Q: Expected one of but found different token?
+A: Parse error. Check syntax carefully. Missing commas, semicolons, braces. cargo check provides line numbers.
+
+Q: Trait object cannot be made into object?
+A: Trait must be object-safe. No Self::Sized. All methods take &self. Use dyn for dynamic dispatch.
+
+Q: I need to return reference but lifetime too short?
+A: Return owned data instead. String instead of &str. Vec instead of &[T]. Consider Cow for flexibility.
+
+Q: How do I avoid cloning?
+A: Use borrowing (&T, &mut T) when possible. Channels transfer ownership. Rc/Arc for sharing. Interior mutability.
+
+Q: Trying to move and use multiple times?
+A: Ownership prevents this. Clone if needed. Use references. Redesign for single move.
+
+Q: impl Trait vs dyn Trait?
+A: impl Trait monomorphizes code, generates specialized code. dyn Trait dynamic dispatch runtime. impl Trait for params/returns. dyn Trait for trait objects.
+
+Q: How do I fix "mismatched types"?
+A: Types don't align. Check explicit annotations. Use turbofish ::<Type> for ambiguous. Traits required for operations.
+
+Q: What's the error about "Does not implement"?
+A: Type doesn't implement required trait. Implement trait or add bounds. Use correct type operations.
+
+Q: I can't compile my async code?
+A: Ensure .await inside async context. Tokio runtime required for execution. Check futures are polled. AsyncRead/AsyncWrite traits.
+
+Q: Raw pointer is unsafe to deref?
+A: Raw pointers (*const T, *mut T) require unsafe blocks to deref. Verify pointer validity. Check alignment. No automatic dropping.
+
+Q: How do I improve error messages?
+A: derive(Debug) for types. impl Display for custom messages. Use anyhow for error context. Map_err for conversion.
+
+Q: What's the best way to handle configuration?
+A: Config files: toml, yaml, json. Environment variables. Command-line arguments. Precedence: defaults < config < env < args.
+
+Q: How do I add logging?
+A: log crate for abstraction. env_logger for console output. slog for structured logging. tracing for distributed. Multiple backends.
+
+Q: How do I create custom types safely?
+A: Newtype pattern wraps type. struct UserId(u32) prevents mixing. Type system guarantees. Zero runtime cost. Builder for validation.
+
+Q: How do I handle optional fields?
+A: Option<T> for optional. None for missing. Some(value) for present. Serde skip_if for serialization. Defaults for missing.
+
+Q: How do I efficiently use strings?
+A: &str for borrowed. String for owned. Cow<str> for flexibility. String::from for allocation. intern strings for duplicates.
+
+Q: How do I handle global state?
+A: Avoid if possible. once_cell for single initialization. lazy_static macro. Thread-local storage for per-thread. Arc<Mutex<T>> for shared.
+
+Q: How do I write high-level code?
+A: Use abstractions. Trait objects for polymorphism. Builder for configuration. Iterators for sequences. Result for errors.
+
+Q: How do I test edge cases?
+A: proptest for property testing. QuickCheck for random input. Fuzzing for crash detection. Manual edge cases. Boundary conditions.
+
+Q: How do I handle backpressure?
+A: Buffer limits. Reactive backpressure. Tokio channels bounded. Async streams. Cancellation support.
+
+Q: How do I write DSLs?
+A: Macros for syntax extension. Parser combinators. Proc macros for attributes. Runtime interpretation. Compile-time expansion.
+
+Q: How do I handle platforms differences?
+A: #[cfg(target_os = "...")] for platform code. cfg_attr for conditional compilation. Abstraction layers. Platform-specific modules.
+
+Q: How do I distribute code?
+A: Publish to Crates.io. cargo publish. Documentation.rs auto-generates. Version management. Semantic versioning.
+
+Q: How do I prevent memory fragmentation?
+A: Object pooling. Arena allocators. Custom allocators. Jemalloc integration. Allocation patterns.
+
+Q: How do I handle large datasets?
+A: Streaming processing. Iterator patterns. Memory mapping. Out-of-core algorithms. External sorting.
+
+Q: How do I validate user input?
+A: Type system provides structure. Parse to typed values. Validate after parsing. Error types. Whitelist approach.
+
+Q: How do I handle multiple result types?
+A: Enum variants for error types. Custom error enum. From trait for conversion. ? operator for chaining. Error context layers. Type system unification.
+
+Q: How to avoid cloning everywhere?
+A: Use references. Borrow checker allows. Lifetimes connect lifespans. References don't consume. Borrowing semantics. Performance gain. Less garbage.
+
+Q: Can I store closure in struct?
+A: With generic type parameter. struct Wrapper<F: Fn()> { f: F }. Or trait object. Box<dyn Fn()>. dyn keyword. Runtime dispatch. Performance trade-off.
+
+Q: What's move closure?
+A: move || captures by value. Takes ownership. Lifetime independent. Can escape scope. Used in threads. spawn() requires move. Ownership transfer.
+
+Q: How many types of borrowing?
+A: Two immutable borrow. Shared access. Multiple simultaneous. Mutable borrow. Exclusive access. Only one at time. Cannot mix. Lexical scope. Temporary release.
+
+Q: Can trait extend another trait?
+A: Yes supertrait syntax. trait Drawable: Clone {}. Implements Clone required. Multiple supertraits. Diamond inheritance possible. Ambiguity resolution. Use full path syntax.
+
+Q: How do I create compile-time constant?
+A: const keyword. Evaluated at compile-time. Inlined everywhere. Must be const expression. No function calls. Limited operations. const fn for functions. Generic parameters possible.
+
+Q: What's difference between static and const?
+A: const inlined. static fixed address. const no address. static mutable requires unsafe. static useful for globals. const better for values. Mutable statics dangerous.
+
+Q: How to iterate with index?
+A: enumerate() adapter. (index, value) pairs. for (i, x) in vec.iter().enumerate(). Convenient. Zero-cost abstraction. Functional style.
+
+Q: How do I prevent integer overflow?
+A: Checked operations. checked_add(), checked_mul(). Returns Option<T>. Wrapping operations. Wrapping_add() wraps. Saturating operations. saturating_add() clamps. Debug catches.
+
+Q: Can I use null in Rust?
+A: No null pointer. Option<T> provides None. Pattern match or unwrap. Type safety. No null dereference panics. Some(T) for values. Explicit absence.
+
+Q: How do I implement Drop manually?
+A: Implement Drop trait. impl Drop { fn drop(&mut self) {}. Resource cleanup. Automatic on scope exit. Panic-safe. Called during unwinding. Order important.
+
+Q: What's difference between Box and Rc?
+A: Box single owner. Rc reference counted. Rc shared. Box unique. Box on stack. Rc pointer on heap. Arc for threads. Rc single-threaded.
+
+Q: How do I make async function?
+A: async fn returns Future. .await on result. Executor runs. tokio runtime. Future not executed until awaited. Lazy evaluation. Composition possible.
+
+Q: Can I use threads with shared state?
+A: Arc<Mutex<T>> combination. Arc cloned. Mutex locked. Exclusive access. Deadlock risk. Message passing preferred. Channels simpler. Less error-prone. Racing thread safe.
+
+Q: How do I test private functions?
+A: Tests in same file. mod tests { #[test] fn test() {} }. Access private. Integration tests separate. Cannot test private. Public interface testing. Visible components unit tested.
+
+Q: What's proc macro?
+A: Procedural macro operates on token stream. Custom derive implementations. Attributes. Function-like. Code generation. Compile-time execution. Custom syntax. Advanced pattern.
+
+Q: How do I document code?
+A: Triple slash comments. /// for items. //! for container. Doc tests. Examples section. Markdown formatting. cargo doc generates. Publishes to docs.rs.
+
+Q: How do I handle generics in traits?
+A: impl<T> Trait for Type<T>. Associated types. type Item = T. Generic both parameters and trait. Where clauses. Variance handling. PhantomData for unused.
+
+Q: Can I convert String to &str?
+A: Deref coercion automatic. Borrow as reference. Some(&string). Explicit dereference. *.ptr.offset() risky. LeakingMap for &'static. OS strings OS compatibility.
+
+Q: What's the difference between Box<T> and Vec<T>?
+A: Box<T> single heap allocation. Fixed size. Smart pointer. Vec<T> growable array. Dynamic size. Reallocates on growth. Both heap-allocated. Choice depends on needs.
+
+Q: How do I avoid borrow checker issues?
+A: Use references properly. Don't move when not needed. Clone when necessary. Restructure code if conflicts. Sometimes restructuring makes sense. Test in small functions.
+
+Q: Why does rustfmt remove my formatting?
+A: rustfmt enforces community standard. Idiomatic Rust. Consistency benefit. Suppress with #[rustfmt::skip]. Or configure rustfmt.toml. Override defaults. Team agreements.
+
+Q: How do I implement From and Into?
+A: From<T> trait. impl From<T> for U. Into automatically from From. Generic conversion. Fallible version: TryFrom. Error handling. Composable.
+
+Q: Can I have function with variable return type?
+A: Only with trait objects. dyn Trait types. Or different enum variants. Or generics with where. Type must be known at compile-time. Or Box<dyn T>.
+
+Q: How do I handle cyclic references?
+A: Problem in garbage collected languages. Rust: Rc<RefCell<>> solution. Or restructure to acyclic. Parent->child only. Weak<T> for back-references. Avoid cycles if possible.
+
+Q: What's the performance impact of ? operator?
+A: Negligible in release builds. Optimized to inline. Error path slower. But error case rare typically. Ergonomics benefit worth cost. Use freely.
+
+Q: How do I make generic type optional?
+A: Option<T> wraps optional generic. Or default trait implementation. Or where clause with default. Default trait for type default. Implicit when used.
+
+Q: Can I have recursive struct?
+A: Direct recursion infinite size. Use Box for indirection. Box<Node> for tree nodes. Pointer breaks recursion. Defined size possible. Indirect through pointer.
+
+Q: How do I make async function send?
+A: All awaits must be in Send futures. tokio Send futures included. Mutex must be lock if shared. Send trait required for threads. Compiler verifies. Blocks compilation if unsafe.
+
+Q: What's phantom type?
+A: PhantomData<T> marker. Zero-size. Carries type information. Variance. Ownership simulation. Useful for type-level computation. API design. Compile-time only.
+
+Q: How do I use custom allocator?
+A: #![global_allocator] unstable feature. or local allocators. Box<T, A> generic over allocator. Custom allocation strategy. Performance optimization. Memory region control.
+
+Q: Can I have variadic functions?
+A: No native variadic. macros alternative. Arguments through vec/tuple. Type safety trade-off. Macros can appear variadic. generate_function macro pattern. Limited flexibility.
+
+Q: How do I call from C to Rust?
+A: export functions with #[no_mangle]. extern "C" for C ABI. Callbacks tricky. Function pointers possible. Closures require boxing. User data context pointer. Calling convention important.
+
+Q: What's RAII in Rust?
+A: Resource Acquisition Is Initialization. Constructor acquires. Destructor releases. Scope-based cleanup. Panic-safe. Drop trait handles. Deterministic cleanup. Unlike GC languages.
+
+Q: Can I have empty struct?
+A: Yes, unit struct. struct Marker; No fields. Useful for type markers. PhantomData alternative. Trait implementations. Type system. Compile-time safety.
+
+Q: How do I convert between string types?
+A: String.as_str() for &str. String::from(&str) for String. To owned. as_str() efficient. str::to_string() for String. OsString/OsStr for paths.
+
+Q: What's coherence in trait system?
+A: Trait impl coherence rule. Prevents conflicting impls. Orphan rule. Fundamental types. Local types or local traits. Ensures deterministic. Prevents diamond problem variations.
+
+Q: Can I have function static variable?
+A: once_cell::sync::Lazy pattern. or lazy_static macro. or thread_local macro. Hidden state. Mutable requires unsafe. Initialization guaranteed once. Shared across calls.
+
+Q: How do I handle platform-specific code?
+A: #[cfg(target_os = "...")]. separate modules. cfg! macro. features. Compile-time removal. Zero runtime cost. Multiple target builds. CI verification important.
+
+Q: What's trait object?
+A: dyn Trait syntax. Runtime polymorphism. Virtual method calls. Dynamic dispatch. Object safe traits required. Sized doesn't work. Method resolution runtime.
+
+Q: How do I reduce binary size?
+A: strip symbols. LTO linking. link-arg = "-Cstrip=all". Dead code elimination. Reduce generics. Minimal dependencies. wasm-opt tool. Profile-guided optimization.
+
+Q: Can closures have lifetime?
+A: Yes, closures capture lifetimes. Bounds inferred. Parameters explicit. Return implicit. FnOnce, Fn, FnMut. Move keyword transfers. Useful for callbacks.
+
+Q: How do I integrate Python?
+A: PyO3 crate. Python wrapper. Bidirectional bindings. Performance. Python code calls Rust. Rust calls Python. Shared data structures. FFI underneath.
+
+Q: What's GAT (Generic Associated Type)?
+A: Generic parameters in associated types. type Item<'a>. Enables higher-ranked traits. More expressive than simple generics. Partially stabilized. Powerful abstractions.
+
+Q: How do I avoid unwrap() calls?
+A: Use ? operator. map/and_then combinators. ok_or for Option. unwrap_or default. Pattern matching. Explicit error handling. Panic-free production code.
+
+Q: Can I have negative trait bounds?
+A: No direct negative bounds. Use marker traits. PhantomData for contraints. Compile-time verification. Workarounds exist. Future language feature possibility.
+
+Q: How do I handle large compile times?
+A: Split crates. Parallel compilation. codegen-units. lto. incremental compilation. sccache distributed caching. mold linker. Profile compilation.
+
+Q: How do I implement Display for my custom type?
+A: Implement std::fmt::Display: impl fmt::Display for MyType { fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { write!(f, "MyType({})", self.value) } }. Import std::fmt. The write! macro writes to the formatter. Return fmt::Result.
+
+Q: What is the difference between String::new() and String::from("")?
+A: Both produce an empty String. String::new() is semantically clearer: it signals intent. String::from("") converts a string literal. Prefer String::new() for empty strings, String::from("text") for non-empty content.
+
+Q: How do I sort a Vec of structs by a field?
+A: Use sort_by_key: v.sort_by_key(|item| item.field); for Copy fields. For non-Copy, use sort_by: v.sort_by(|a, b| a.name.cmp(&b.name));. For floating-point, use partial_cmp: v.sort_by(|a, b| a.score.partial_cmp(&b.score).unwrap_or(Ordering::Equal));
+
+Q: How do I convert between numeric types safely?
+A: Use TryFrom/TryInto for checked conversion: let n: i32 = 300; let small: Result<u8, _> = u8::try_from(n); // Err if overflow. Use as for truncating casts (unsafe). Prefer TryFrom in library code.
+
+Q: How do I handle Option in a chain without multiple unwraps?
+A: Use map/and_then/unwrap_or: let result = some_option.map(|x| transform(x)).unwrap_or(default_value);. For chains: option.and_then(|x| another_option(x)).unwrap_or_default(). The ? operator works in functions returning Option.
+
+Q: How do I read command-line arguments?
+A: Use std::env::args(): let args: Vec<String> = std::env::args().collect(); args[0] is the program name. For robust parsing, use clap or lexopt crates. Without crates: let input = args.get(1).expect("Usage: program <arg>");
+
+Q: What does #[derive(Debug)] actually generate?
+A: It generates impl fmt::Debug for YourType that recursively prints all fields using {:?} format. struct Foo { x: i32, y: String } derives to something like Foo { x: 42, y: "hello" } when debug-printed. Relies on all fields implementing Debug.
+
+Q: How do I share state between multiple threads?
+A: Wrap state in Arc<Mutex<T>>: let state = Arc::new(Mutex::new(HashMap::new())); For each thread: let s = Arc::clone(&state); thread::spawn(move || { let mut map = s.lock().unwrap(); map.insert(...); }). Arc provides shared ownership; Mutex provides synchronized access.
+
+Q: How do I use the entry API for HashMap?
+A: map.entry(key).or_insert(value) inserts if absent, returns mutable reference either way. For computed values: map.entry(key).or_insert_with(|| expensive_computation()). For incrementing: *map.entry(word).or_insert(0) += 1;
+
+Q: Why does my iterator chain not work with collect()?
+A: collect() needs a type hint because it's generic. Annotate: let v: Vec<i32> = iter.collect(); or turbofish: iter.collect::<Vec<_>>(). For HashMap: let m: HashMap<_, _> = pairs.collect();. The underscore _ tells the compiler to infer the inner type.
+
+Q: How do I implement a recursive data structure?
+A: Use Box to break the size cycle. enum List { Cons(i32, Box<List>), Nil } The Box heap-allocates the tail, giving it a known pointer size. For trees: struct Node { val: i32, left: Option<Box<Node>>, right: Option<Box<Node>> }
+
+Q: How do I run code only in tests?
+A: Use #[cfg(test)] attribute: #[cfg(test)] mod tests { use super::*; #[test] fn it_works() { assert_eq!(2 + 2, 4); } }. The module is compiled only during cargo test. For test helpers outside the test module, use #[cfg(test)] on individual functions too.
+
+Q: How does Rust handle integer overflow?
+A: In debug builds, overflow panics. In release builds, overflow wraps (two's complement). Use checked_add, checked_mul etc. for explicit overflow detection. saturating_add saturates at max. wrapping_add always wraps. overflowing_add returns (result, did_overflow).
+
+Q: How do I convert a Vec<String> to Vec<&str>?
+A: let v: Vec<&str> = vec_of_strings.iter().map(|s| s.as_str()).collect(); Or: vec_of_strings.iter().map(String::as_str).collect(). Note: the &str borrows from the Vec; the Vec must live at least as long as the &str slice.
+
+Q: How do I write to stderr?
+A: Use eprintln! macro: eprintln!("Error: {}", msg); Or use std::io::Write: use std::io::Write; writeln!(std::io::stderr(), "error: {}", msg).unwrap();. For logging in libraries, prefer the log crate with the tracing or env_logger backend.
+
+Q: What is the difference between Clone and Copy?
+A: Copy is implicit: values are bitwise-copied when assigned or passed. It's opt-in via #[derive(Copy, Clone)] but only works for types without heap allocations. Clone is explicit: .clone() makes a deep copy. All Copy types must also be Clone, but not vice versa.
+
+Q: How do I iterate over a HashMap in sorted order?
+A: HashMap has no order. Collect keys, sort, then iterate: let mut keys: Vec<_> = map.keys().collect(); keys.sort(); for k in keys { println!("{}: {}", k, map[k]); }. Or use BTreeMap which maintains sorted order automatically.
+
+Q: How do I conditionally compile code for different platforms?
+A: Use cfg attributes: #[cfg(target_os = "linux")] fn platform_fn() { ... } Or inline: if cfg!(windows) { ... }. Check architecture: #[cfg(target_arch = "x86_64")]. Combine: #[cfg(all(target_os = "linux", target_arch = "x86_64"))].
+
+Q: How do I parse a string into a number?
+A: Use the parse() method: let n: i32 = "42".parse().unwrap();. Or with explicit type: let n = "42".parse::<i32>().unwrap(). It returns Result<T, ParseIntError>, so handle errors: match "abc".parse::<i32>() { Ok(n) => n, Err(e) => ... }
+
+Q: What is PhantomData and when do I use it?
+A: PhantomData<T> is a zero-sized marker that tells the compiler a generic parameter is used, even if it isn't stored. Used for variance, ownership semantics, and lifetimes in generic structs. struct Buffer<T> { ptr: *mut u8, _marker: PhantomData<T> } signals "this owns T".
+
+Q: How do I return multiple values from a function?
+A: Return a tuple: fn min_max(v: &[i32]) -> (i32, i32) { ... }. Destructure on the call site: let (lo, hi) = min_max(&data);. For named returns, use a struct. Tuples are idiomatic for 2-3 values; structs for more or when fields have semantics.
+
+Q: How do I use trait objects with lifetimes?
+A: Annotate the lifetime on the reference: fn process(handler: &dyn Fn(i32) -> i32) { ... }. For stored trait objects: struct S<'a> { callback: &'a dyn Fn() }. Boxed: Box<dyn Fn() + 'a>. Without lifetime, Box<dyn Fn()> defaults to 'static.
+
+Q: How do I avoid cloning when iterating over a Vec?
+A: Use iter() which yields &T instead of into_iter() which yields T. let sum: i32 = numbers.iter().sum(); avoids moving the Vec. If you need to process elements by value, prefer iter() with dereference: numbers.iter().map(|&x| x * 2).
+
+Q: How do I implement Default for a struct?
+A: Either derive it: #[derive(Default)] struct Config { timeout: u32, debug: bool } which uses 0 and false. Or implement manually: impl Default for Config { fn default() -> Self { Config { timeout: 30, debug: false } } }. Used by HashMap::entry().or_default() and many APIs.
+
+Q: How do I convert an Option to a Result?
+A: option.ok_or(SomeError) converts Some(v) to Ok(v), None to Err(SomeError). option.ok_or_else(|| compute_error()) is lazy. Going the other way: result.ok() drops the error and returns Option.
+

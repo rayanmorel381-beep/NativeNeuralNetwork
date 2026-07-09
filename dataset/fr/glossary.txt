@@ -1,0 +1,290 @@
+Glossaire Rust francophone
+
+Ownership : système de possession unique. Chaque valeur a un propriétaire unique ; quand le propriétaire sort de portée, la valeur est libérée. Garantit l'absence de double-free et de use-after-free à la compilation.
+
+Borrow checker : composant du compilateur qui vérifie les règles d'emprunt. Il valide qu'aucune référence ne survit à sa donnée et qu'on n'a jamais simultanément une référence mutable et une autre référence sur la même valeur.
+
+Lifetime : annotation de durée de vie. Notée 'a, elle indique au compilateur la portée pendant laquelle une référence reste valide. L'élision automatique évite l'annotation explicite dans les cas simples.
+
+Move : transfert de propriété. Lorsqu'une valeur non-Copy est affectée ou passée à une fonction, sa propriété est déplacée et l'ancien binding devient inutilisable.
+
+Copy : trait marqueur pour les types dont la copie bit-à-bit est sémantiquement équivalente à un move. Les entiers, flottants, booléens et tuples de types Copy sont Copy.
+
+Clone : trait fournissant une duplication explicite et potentiellement coûteuse via .clone(). Contrairement à Copy, Clone peut allouer ou exécuter du code arbitraire.
+
+Drop : trait définissant le destructeur. La méthode drop() est appelée automatiquement quand la valeur sort de portée. Permet la gestion déterministe des ressources (fichiers, sockets, mutex).
+
+Slice : référence vers une portion contigüe de mémoire. Notée &[T] pour une slice immuable ou &mut [T] pour mutable. Inclut un pointeur et une longueur. Les chaînes ont leur slice spécifique &str.
+
+String vs str : String est un buffer croissant alloué sur le heap, propriétaire. &str est une référence vers une séquence UTF-8 valide, non propriétaire. On crée une String avec String::from ou .to_string(), on l'emprunte en &str via déréférencement.
+
+Vec<T> : vecteur dynamique sur le heap. Capacité auto-extensible. Indexable, itérable, supporte push, pop, insert, remove. Équivalent du std::vector C++ avec garanties mémoire.
+
+HashMap<K, V> : table de hachage. Requiert que K implémente Hash + Eq. Utilise SipHash par défaut pour la résistance aux attaques HashDoS. Performance amortie O(1) sur insert/get/remove.
+
+BTreeMap<K, V> : carte triée basée sur un arbre B. Conserve l'ordre des clés, permet les itérations range, opérations en O(log n).
+
+Box<T> : pointeur intelligent vers une allocation unique sur le heap. Permet la récursivité dans les types et l'effacement de type via &dyn Trait.
+
+Rc<T> : compteur de références à thread unique. Plusieurs Rc peuvent posséder la même donnée ; libération quand le dernier sort de portée. Pas Send, donc inutilisable cross-thread.
+
+Arc<T> : compteur de références atomique. Équivalent thread-safe de Rc. Send + Sync. Coût d'une incrémentation atomique sur clone.
+
+RefCell<T> : conteneur à mutabilité intérieure, vérifiée à l'exécution. .borrow() retourne Ref<T>, .borrow_mut() retourne RefMut<T>. Panique si les règles d'emprunt sont violées.
+
+Mutex<T> : verrou d'exclusion mutuelle. .lock() bloque jusqu'à obtention du verrou, retourne un MutexGuard libéré au Drop. Empoisonnement automatique si un thread panique en le tenant.
+
+RwLock<T> : verrou lecteur-écrivain. Plusieurs lecteurs simultanés ou un seul écrivain exclusif. Préférable au Mutex quand les lectures dominent largement.
+
+Channel : canal mpsc (multiple producteurs, un seul consommateur). std::sync::mpsc::channel renvoie (Sender, Receiver). Tokio et crossbeam fournissent des variantes async et MPMC.
+
+async/await : sucre syntaxique pour les Futures. async fn retourne une Future qui ne s'exécute qu'au .await. Nécessite un runtime (tokio, async-std, smol) pour être pollée.
+
+Future : trait représentant un calcul asynchrone qui produira une valeur. Méthode poll prenant un Context, retournant Poll::Pending ou Poll::Ready.
+
+Pin<T> : marqueur garantissant qu'une valeur ne sera plus déplacée en mémoire. Indispensable pour les Futures auto-référentielles générées par async fn.
+
+Send : trait marqueur indiquant qu'une valeur peut traverser une frontière de thread. Auto-implémenté ; les types contenant Rc, *const T ou cellules non-thread-safe ne sont pas Send.
+
+Sync : trait marqueur indiquant qu'une référence partagée vers le type est sûre à utiliser depuis plusieurs threads. T est Sync si &T est Send.
+
+trait : interface définissant un comportement. Peut contenir des méthodes par défaut, des types associés, des constantes associées. Implémenté via impl Trait for Type.
+
+Trait object : référence dynamique &dyn Trait ou Box<dyn Trait> permettant la dispatche dynamique. Coût d'une vtable indirection mais permet l'hétérogénéité.
+
+Generics : paramètres de type. fn f<T: Trait>(x: T) génère une version spécialisée par appelant via monomorphisation, sans coût d'indirection.
+
+where clause : syntaxe permettant d'attacher les bounds en fin de signature, utile pour les contraintes complexes ou impliquant des associated types.
+
+PhantomData<T> : marqueur de variance et d'ownership pour les types génériques qui ne stockent pas réellement T. Utilisé dans les wrappers FFI et les bibliothèques avancées.
+
+Cargo : système de build et gestionnaire de paquets officiel. Lit Cargo.toml, télécharge les crates depuis crates.io, compile, teste, publie, gère les workspaces.
+
+crate : unité de compilation. Soit un binaire (avec main.rs), soit une bibliothèque (avec lib.rs). Publiable sur crates.io.
+
+module : espace de noms. Déclaré via mod nom ; ou mod nom { ... }. Contrôle la visibilité avec pub, pub(crate), pub(super), pub(in path).
+
+workspace : ensemble de crates partageant un Cargo.lock et un target/ communs. Déclaré dans le Cargo.toml racine via [workspace] members = [...].
+
+Cargo.toml : manifeste TOML décrivant le paquet, ses dépendances, ses features, ses profils de compilation et ses targets.
+
+Cargo.lock : fichier verrouillé contenant les versions exactes résolues. Commit recommandé pour les binaires, ignoré historiquement pour les bibliothèques (la pratique évolue).
+
+feature : drapeau de compilation conditionnelle. Activé via cfg(feature = "nom"). Permet la sélection d'API ou de dépendances optionnelles. Doit être additif.
+
+target : plateforme de compilation cible. Identifiée par un triplet comme x86_64-unknown-linux-gnu ou wasm32-unknown-unknown. Liste via rustc --print target-list.
+
+rustup : installeur et gestionnaire de toolchains. Permet d'installer stable, beta, nightly et des composants comme rustfmt, clippy, rust-analyzer.
+
+rustfmt : formateur officiel. Configurable via rustfmt.toml. Préserve la cohérence stylistique.
+
+Clippy : linter officiel. Plus de 700 lints regroupés en catégories (correctness, performance, style, complexity, perf). Exécuté via cargo clippy.
+
+rust-analyzer : serveur de langage. Fournit complétion, navigation, refactoring, diagnostic temps réel pour les éditeurs compatibles LSP.
+
+unsafe : mot-clé permettant cinq superpouvoirs : déréférencer un raw pointer, appeler une unsafe fn, accéder à une static mut, implémenter un unsafe trait, accéder à un champ union. Ne désactive PAS le borrow checker.
+
+raw pointer : pointeur brut *const T ou *mut T. Pas vérifié, peut être null, dangling, mal aligné. Manipulé uniquement en unsafe.
+
+UB (Undefined Behavior) : comportement non défini. En Rust, viser zéro UB. unsafe oblige à respecter les invariants documentés pour ne pas créer d'UB.
+
+Miri : interpréteur expérimental détectant l'UB. Exécute le MIR (Mid-level IR) avec validation stricte des règles d'aliasing et de mémoire.
+
+MIR : représentation intermédiaire de mi-niveau. Forme simplifiée du code après lowering depuis le HIR, utilisée par le borrow checker et les optimisations.
+
+HIR : représentation intermédiaire de haut niveau. Plus proche du source, utilisée pour la résolution de noms et le typage.
+
+LLVM IR : représentation intermédiaire de bas niveau. Cible de codegen ; LLVM produit ensuite le code machine.
+
+Codegen unit : unité de génération de code parallèle. Plus de CGU = compilation plus rapide mais optimisations moindres. release vise 16 par défaut.
+
+LTO : Link-Time Optimization. Optimisation inter-modules au moment du lien. fat LTO maximise les opportunités, thin LTO est un compromis temps/performance.
+
+Profil : configuration de build. dev (debug, incremental, no opt), release (opt-level 3, LTO optionnel, codegen-units = 16). Personnalisable dans Cargo.toml.
+
+panic strategy : abort ou unwind. unwind exécute les destructeurs Drop, abort termine immédiatement. abort réduit la taille du binaire mais empêche les hooks de cleanup.
+
+no_std : compilation sans la bibliothèque standard. Conserve core (types primitifs, traits fondamentaux) mais retire alloc, std::io, std::thread. Cible embarquée et noyaux.
+
+embedded-hal : trait HAL standard pour embarqué. Abstraction matérielle commune adoptée par les BSP et drivers de l'écosystème.
+
+WASM : WebAssembly. Cible bytecode portable, exécutable dans navigateurs et runtimes (Wasmer, Wasmtime). wasm32-unknown-unknown et wasm32-wasi sont les triplets principaux.
+
+FFI : Foreign Function Interface. Interopérabilité avec C via extern "C". bindgen génère les bindings depuis les headers, cbindgen génère les headers depuis Rust.
+
+ABI : Application Binary Interface. extern "C", extern "system", extern "Rust" déterminent la convention d'appel. extern "Rust" n'est pas stable et peut changer.
+
+repr : attribut contrôlant la représentation mémoire. #[repr(C)] aligne sur la convention C, #[repr(transparent)] pour les wrappers à champ unique, #[repr(packed)] supprime le padding.
+
+ZST : Zero-Sized Type. Type de taille nulle (() , PhantomData, structs vides). Aucune allocation à l'exécution, optimisé par le compilateur.
+
+DST : Dynamically Sized Type. Type de taille inconnue à la compilation (str, [T], dyn Trait). Manipulé via pointeurs gras incluant la taille.
+
+Fat pointer : pointeur gras. Contient l'adresse plus une métadonnée (longueur pour slice, vtable pour trait object). Deux mots-machine sur la plupart des architectures.
+
+vtable : table de fonctions virtuelles. Associée à chaque implémentation de trait object, contient les pointeurs vers les méthodes et la destruction.
+
+monomorphisation : génération d'une version spécialisée du code générique par jeu de paramètres concrets. Augmente la taille du binaire mais élimine l'indirection.
+
+inline : optimisation insérant le corps d'une fonction au site d'appel. Guidée par #[inline], #[inline(always)], #[inline(never)] ou heuristiques du compilateur.
+
+zero-cost abstraction : abstraction sans surcoût runtime. Itérateurs, futures, traits génériques compilent vers du code aussi efficace qu'un équivalent écrit à la main.
+
+iterator : trait Iterator avec méthode next. Composable via map, filter, fold, collect, etc. Évaluation paresseuse jusqu'à la consommation finale.
+
+IntoIterator : trait permettant la conversion vers un Iterator. for x in collection utilise IntoIterator implicitement.
+
+closure : fonction anonyme capturant son environnement. Trois traits selon le mode de capture : Fn (emprunt immuable), FnMut (emprunt mutable), FnOnce (consomme).
+
+move closure : closure prenant possession des variables capturées via move ||. Indispensable quand la closure survit à la portée d'origine, notamment dans les threads.
+
+dyn Trait : trait object dynamique. Coût d'une indirection vtable mais permet la collection hétérogène et l'API stable.
+
+impl Trait : type opaque retourné. impl Iterator masque le type concret. Utilisable en argument (sucre pour generics) et en retour (existential type).
+
+trait alias : raccourci pour combinaisons de traits. Encore instable, utile pour réduire la verbosité.
+
+GAT : Generic Associated Types. Permet aux types associés d'avoir des paramètres génériques (incluant lifetimes). Stabilisé en Rust 1.65.
+
+const generics : paramètres de type constants. struct Array<T, const N: usize>. Permet les tableaux génériques en taille.
+
+const fn : fonction évaluable au moment de la compilation. Sous-ensemble du langage utilisable dans les const items et array sizes.
+
+derive macro : macro procédurale dérivant automatiquement une implémentation. Exemples : Debug, Clone, Copy, PartialEq, Hash, Serialize.
+
+attribute macro : macro procédurale transformant un item décoré. Exemples : #[tokio::main], #[wasm_bindgen], #[get("/")] (Rocket).
+
+function-like macro : macro procédurale ressemblant à un appel de fonction. Exemple : sql!(SELECT * FROM users), html!(<div/>).
+
+declarative macro : macro_rules!. Définie par pattern matching sur des token trees. Hygiénique, expansée à la compilation.
+
+build script : build.rs. Compilé et exécuté avant la compilation du crate. Permet codegen, link de bibliothèques natives, configuration cfg.
+
+bench : benchmark. cargo bench utilise libtest (nightly) ou criterion (stable). Mesure les performances avec analyse statistique.
+
+doctest : test extrait des exemples ``` rust dans la doc. Exécuté par cargo test. Garantit que les exemples documentés restent valides.
+
+doc comment : commentaire de documentation. /// pour items, //! pour modules. Markdown supporté. Exporté en HTML via cargo doc.
+
+semver : versionnement sémantique. MAJOR.MINOR.PATCH. Les crates publiés sur crates.io doivent respecter semver pour ne pas casser leurs consommateurs.
+
+edition : édition du langage. 2015, 2018, 2021, 2024. Changements opt-in dans la syntaxe et les lints sans rompre la compatibilité.
+
+soundness : propriété d'un type/API garantissant l'absence d'UB en utilisation safe. Une API unsound est un bug critique.
+
+aliasing : co-existence de plusieurs références vers la même donnée. Rust interdit l'aliasing mutable, base des optimisations LLVM noalias.
+
+NLL : Non-Lexical Lifetimes. Lifetimes basés sur l'usage réel plutôt que la portée syntaxique. Active depuis l'édition 2018, rend de nombreux programmes acceptables sans annotation.
+
+Polonius : prochain borrow checker basé sur la logique Datalog. Plus précis sur certains patterns conditionnels, en cours d'intégration.
+
+Chalk : implémentation Datalog du système de traits. Vise à remplacer le résolveur de traits actuel et simplifier les fonctionnalités avancées (specialisation, GATs).
+
+orphan rule : règle interdisant d'implémenter un trait externe pour un type externe. Garantit la cohérence des implémentations entre crates.
+
+coherence : propriété assurant qu'au plus une implémentation s'applique pour un (Trait, Type) donné dans tout le programme. Maintenue par l'orphan rule et le checker de chevauchement.
+
+specialization : capacité d'override une impl générique par une impl plus spécifique. Encore instable, source de complexité pour la soundness.
+
+const eval : évaluation à la compilation. const items, const fn, const generics évalués par l'interpréteur const du compilateur.
+
+ICE : Internal Compiler Error. Bug du compilateur, à reporter sur github.com/rust-lang/rust avec un MCVE (Minimum Complete Verifiable Example).
+
+Abandon (Abort) : Terminaison immédiate sans nettoyage. std::process::abort(). Différent du panic qui dépile.
+
+Arc : Comptage de références atomique. Pointeur de propriété partagée thread-safe. Chaque clone incrémente le compteur. Le dernier drop libère la donnée.
+
+Blanket impl : Implémentation de trait pour tous les types satisfaisant une contrainte. impl<T: Display> MonTrait for T. Fournit un comportement par défaut largement.
+
+Borrow checker : Sous-système du compilateur vérifiant les règles d'emprunt à la compilation. Garantit l'absence de data races et de références pendantes.
+
+Constante associée : Constante définie dans un trait ou impl. const MAX: usize = 100;. Accessible via Type::MAX.
+
+Covariant : Paramètre de type où la relation de sous-typage est préservée. &'long T est sous-type de &'short T.
+
+Déréférencement automatique : Le compilateur insère des appels * implicitement lors des appels de méthodes. x.method() peut déréférencer x autant que nécessaire.
+
+Dispatch dynamique : Appel de méthode par vtable. dyn Trait. Coût à l'exécution. Permet le polymorphisme hétérogène.
+
+Dispatch statique : Appel de méthode résolu à la compilation. impl Trait ou T: Trait. Zéro coût. Monomorphisation.
+
+DST : Type de taille dynamique. Taille inconnue à la compilation. str, [T], dyn Trait. Doit être derrière un pointeur.
+
+Elision de lifetime : Règles permettant d'omettre les annotations de lifetime dans les cas simples. Rend les signatures plus lisibles.
+
+Emprunt (Borrow) : Accès temporaire à une valeur sans transfert de propriété. Immuable (&T) ou mutable (&mut T).
+
+Enum : Type somme avec variantes nommées. Chaque variante peut avoir des données associées. Le pattern matching extrait les variantes de façon exhaustive.
+
+Entrée (Entry) : API de HashMap pour insérer ou modifier en une seule opération. map.entry(clé).or_insert(valeur) évite la double recherche.
+
+Fat pointer : Pointeur deux-mots portant des métadonnées. &[T] stocke pointeur + longueur. &dyn Trait stocke pointeur + vtable.
+
+Feature : Fonctionnalité optionnelle d'un crate. Activée via Cargo.toml ou cargo build --features. Gère les dépendances conditionnelles.
+
+Fermeture (Closure) : Valeur fonctionnelle capturant son environnement. Traits Fn, FnMut, FnOnce. Le mot-clé move transfère les captures.
+
+Flux (Flow) : Contrôle de flux. if, loop, while, for, match, break, continue, return. Les expressions ont des valeurs.
+
+Garde (Guard) : Condition supplémentaire dans un bras de match. if condition dans un pattern. Réduit les faux positifs de l'exhaustivité.
+
+HRTB : Higher-Ranked Trait Bound. for<'a> Fn(&'a str). Valable pour toutes les lifetimes. Nécessaire pour les callbacks génériques.
+
+Immuable par défaut : En Rust, les liaisons sont immuables par défaut. let x = 5 ne peut pas être réassigné. let mut x = 5 est nécessaire.
+
+Inférence de type : Le compilateur déduit les types depuis le contexte. Évite les annotations répétitives. Peut être aidé par le turbofish ::<T>.
+
+Intrinsèques : Opérations bas niveau directement sur le CPU. Accessibles via std::arch. Performance critique. Requièrent unsafe.
+
+Invariant : Condition qui doit toujours être vraie. Code unsafe documente ses invariants. Le code safe les maintient.
+
+LTO : Link-Time Optimization. Optimisation cross-crate. [profile.release] lto = true. Compilation plus lente, exécution plus rapide.
+
+Macro déclarative : macro_rules!. Correspondance de patterns sur des tokens. Expansion à la compilation. Code générique sur la syntaxe.
+
+Macro procédurale : Transformation de TokenStream. Derive macros, attribute macros, function-like macros. Plus puissantes mais plus complexes.
+
+Modèle acteur : Concurrence par envoi de messages. Pas de mémoire partagée. Isolation entre acteurs. Tolérance aux panics.
+
+Monomorphisation : Instanciation des génériques par type concret. Chaque T génère du code. La taille du binaire augmente avec le nombre de types.
+
+MIR : Mid-level Intermediate Representation. IR interne du compilateur. Utilisé pour le borrow checking et l'optimisation.
+
+Newtype : Type enveloppe. struct Metres(f64). Prévient la confusion entre types similaires. Zéro coût à l'exécution.
+
+OnceLock : Cellule d'initialisation paresseuse. std::sync::OnceLock. S'initialise exactement une fois. Thread-safe.
+
+Opaque : Implémentation cachée. impl Trait en retour. dyn Trait. Permet de changer l'implémentation sans casser l'API.
+
+Orphan rule : Une impl de trait nécessite le type local ou le trait local. Empêche les conflits entre crates. Garantit la cohérence.
+
+Pinning : Empêche la valeur de bouger en mémoire. Pin<P>. Requis pour les structs autoréférentielles. Utilisé dans les state machines async.
+
+Propriété (Ownership) : Chaque valeur a exactement un propriétaire. Le move transfère la propriété. Le drop libère la ressource quand le scope se termine.
+
+Rustfmt : Formateur de code officiel. cargo fmt. Style uniforme. Configurable via rustfmt.toml. Intégré dans les CI.
+
+Send : Trait marqueur indiquant qu'un type peut être transféré entre threads. Implémenté automatiquement. Les raw pointers sont !Send.
+
+Slice : Vue de taille dynamique sur un tableau contigu. &[T]. Pas de propriété. Utilisable sur les Vec, arrays, et données contiguës.
+
+Smart pointer : Enveloppe autour d'un pointeur. Implémente Deref et Drop. Box, Rc, Arc, RefCell. Gestion automatique des ressources.
+
+Struct de tuple : struct Couleur(u8, u8, u8). Accès par position .0, .1. Pattern matching : Couleur(r, g, b).
+
+Sync : Trait marqueur indiquant qu'un type peut être partagé entre threads via référence. &T: Send si T: Sync.
+
+Trait objet : Référence dyn Trait. Dispatch dynamique. Effacement de type. Permet l'hétérogénéité dans les collections.
+
+Type associé : Type défini dans un trait. type Item. Chaque implémentation spécifie son propre Item. Réduit les paramètres génériques.
+
+UB : Comportement indéfini. Opérations sans sémantique définie. Le compilateur peut faire n'importe quoi. Le code unsafe doit l'éviter absolument.
+
+Variance : Comment les relations de sous-typage se propagent à travers les génériques. Covariant, contravariant, invariant.
+
+Vec : Tableau dynamique alloué sur le heap. Taille variable. Amortissement O(1) pour push. Deref vers &[T].
+
+Visibilité : pub public. privé par défaut. pub(crate) dans tout le crate. pub(super) dans le module parent. Contrôle l'encapsulation.
+
+ZST : Zero-Sized Type. Aucune représentation mémoire. struct Marqueur; PhantomData<T>. Utilisé pour l'information au niveau du type.
+

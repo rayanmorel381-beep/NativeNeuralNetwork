@@ -1,0 +1,128 @@
+Problèmes et solutions inspirés de Stack Overflow
+
+Problème : "cannot move out of borrowed content" sur un Vec<String>.
+Solution : Tu essaies de prendre ownership d'un élément accédé via une référence. Trois options. Utiliser .clone() si tu peux te permettre la copie. Utiliser .swap_remove(index) ou .remove(index) qui retournent par valeur. Restructurer pour itérer en consommant via .into_iter() au lieu de .iter().
+
+Problème : "borrowed value does not live long enough" sur une variable temporaire dans une signature.
+Solution : Le compilateur t'indique qu'une référence sort de la portée trop tôt. Le coupable est souvent un temporaire comme &format!("...") ou &string.to_lowercase(). Stocke le résultat dans un let intermédiaire pour étendre sa lifetime jusqu'à la fin du scope.
+
+Problème : Trying to use String::push_str(&self, s: String) ne compile pas.
+Solution : push_str prend &str, pas String. Soit tu passes &s, soit tu utilises s.as_str(), soit tu emploies + ou .push_str(&autre_string). Rust convertit &String en &str automatiquement via deref coercion.
+
+Problème : Comment retourner une closure depuis une fonction ?
+Solution : Une closure a un type anonyme. Trois retours possibles : Box<dyn Fn(...)> pour le polymorphisme dynamique, impl Fn(...) pour la statique zero-cost si tu n'as qu'une closure par appel, ou fn(...) si la closure ne capture rien.
+
+Problème : Erreur "type annotations needed" sur un .collect().
+Solution : collect peut produire plein de types différents, le compilateur ne devine pas. Annote la variable : let v: Vec<i32> = iter.collect(); ou utilise le turbofish : iter.collect::<Vec<i32>>().
+
+Problème : "the trait Sized is not implemented for str" sur un &str dans une struct.
+Solution : str est un DST, taille inconnue à la compilation. Il faut le manipuler derrière un pointeur : &str avec lifetime, ou String si tu veux owned. Une struct ne peut pas contenir un str directement.
+
+Problème : "future cannot be sent between threads safely".
+Solution : Ta future capture un type non-Send (Rc, MutexGuard tenu pendant un await, RefCell.borrow_mut, raw pointer). Solutions : remplace Rc par Arc, drop le guard avant l'await avec un scope { let g = m.lock().unwrap(); use(g); }, ou utilise tokio::task::spawn_local sur un LocalSet.
+
+Problème : Cargo refuse de compiler après ajout d'une dépendance, erreur "could not select a version".
+Solution : Conflit de versions dans le graphe des transitives. Lance cargo tree -i nom_du_crate pour identifier qui demande quoi. Souvent une feature ou une dépendance directe fixe une version incompatible avec celle requise par une autre crate. Désactive les default-features inutiles ou ajuste les contraintes.
+
+Problème : Une closure retournée capture une référence avec lifetime locale.
+Solution : Si la closure doit survivre à la fonction, elle doit posséder ses captures. Utilise move || ... pour transférer la propriété. Si tu références une chaîne literal &'static str, c'est OK car la lifetime est globale.
+
+Problème : Comment lire un fichier ligne par ligne sans charger tout en mémoire ?
+Solution : use std::io::{BufRead, BufReader}; let f = std::fs::File::open(path)?; for ligne in BufReader::new(f).lines() { let l = ligne?; ... }. Le BufReader bufferise, .lines() retourne un iterator de Result<String>.
+
+Problème : "expected unit struct, found tuple struct" en pattern matching.
+Solution : Si tu déclares struct Foo;, tu matches Foo (sans parenthèses). Si struct Foo();, tu matches Foo(). Si struct Foo { ... };, tu matches Foo { ... }. Garde la cohérence syntaxique.
+
+Problème : RefCell::borrow_mut panique avec "already borrowed".
+Solution : Deux borrows actifs en conflit. RefCell délègue le borrow checking au runtime. Vérifie tous les .borrow() et .borrow_mut() actifs simultanément. Utilise un scope pour limiter la durée, ou évite RefCell et restructure pour le borrow statique.
+
+Problème : Comment paralléliser une boucle sans dépendre de rayon ?
+Solution : Si tu veux rester std-only, utilise std::thread::scope (stable depuis 1.63). Permet de spawner des threads qui peuvent borrow des données locales sans 'static : std::thread::scope(|s| { for chunk in data.chunks_mut(n) { s.spawn(|| process(chunk)); } });
+
+Problème : Erreur "the type ... cannot be sent between threads safely" lors de spawn.
+Solution : std::thread::spawn requiert Send + 'static. Vérifie que toutes les captures de la closure sont Send. Rc → Arc. Cell → AtomicXxx. Donnée avec lifetime 'a → clone vers une donnée 'static ou utilise scope.
+
+Problème : Comment éviter Arc<Mutex<HashMap<K,V>>> pour les performances ?
+Solution : Plusieurs alternatives. dashmap fournit une concurrent HashMap shardée. evmap propose un pattern lecteurs/écrivain avec double buffering. flurry est un port concurrent. Pour les workloads très spécifiques, un partitionnement manuel (sharding par hash modulo n_workers) peut surclasser ces solutions.
+
+Problème : "moved value used here" sur une variable utilisée après .into_iter().
+Solution : into_iter consomme la collection. Tu ne peux plus l'utiliser après. Utilise .iter() pour borrow ou .iter_mut() pour borrow mutable si tu veux la réutiliser. Si tu as besoin du iter consumer et de la collection après, clone avant : v.clone().into_iter()....
+
+Problème : Erreur ambiguë sur un format!("{}", x) quand x est complexe.
+Solution : Le trait Display n'est pas implémenté pour tous les types. Pour Debug, utilise "{:?}". Pour un type custom, implémente impl fmt::Display for T avec write!. Si c'est juste pour débogage, dérive #[derive(Debug)] et utilise {:?}.
+
+Problème : Comment chronométrer une opération précisément ?
+Solution : use std::time::Instant; let debut = Instant::now(); operation(); let duree = debut.elapsed(); println!("{:?}", duree); Pour un benchmark statistiquement valide, utilise criterion plutôt qu'une mesure unique.
+
+Problème : Un Iterator custom retourne "doesn't have a size known at compile-time".
+Solution : Si tu retournes Box<dyn Iterator<Item = T>>, l'objet derrière la box est ?Sized. Soit retourne un type concret (Map<I, F>, FilterMap<I, F>, etc.), soit impl Iterator<Item = T>, soit Box<dyn Iterator<Item = T> + 'a> avec la lifetime explicite si tu captures une référence.
+
+Problème : Async fonction très simple échoue avec lifetime obscure.
+Solution : Les async fn génèrent des state machines qui peuvent capturer des références au-delà des points await. Si tu prends &self, l'async fn renvoie une future qui borrow self pour toute sa durée. Si l'appelant doit pouvoir réutiliser self pendant l'attente, accepte une variante async fn fetch(&self) -> Result<...> avec spawning explicite.
+
+Problème : Comment faire un retry async avec backoff ?
+Solution : Pattern classique avec tokio. let mut delai = Duration::from_millis(100); for tentative in 0..max_tentatives { match operation().await { Ok(r) => return Ok(r), Err(e) if tentative + 1 == max_tentatives => return Err(e), Err(_) => { tokio::time::sleep(delai).await; delai *= 2; } } } Le crate tokio-retry industrialise ce pattern.
+
+Problème : Trait object Box<dyn Trait> compile mais ne peut être cloné.
+Solution : Box<dyn Trait> n'est pas Clone car Trait n'est pas object-safe pour Clone. Solution : déclare un trait helper trait CloneBox { fn clone_box(&self) -> Box<dyn Trait>; } et implémente. Ou utilise le crate dyn-clone qui automatise ce pattern.
+
+Problème : Sérialiser une struct contenant un HashMap pose problème.
+Solution : Pour serde, dérive Serialize et Deserialize sur la struct. HashMap<String, V> sérialise nativement en JSON object. Pour les clés non-String, JSON ne supporte pas directement ; utilise serde_json::to_string sur un Vec<(K,V)> ou customise via #[serde(with = "...")].
+
+Problème : "lifetime may not live long enough" dans un impl de méthode.
+Solution : Le compilateur a besoin d'une annotation explicite. Si une méthode retourne une référence dérivée de &self, la lifetime du retour est liée à &self. impl<'a> Foo<'a> { fn get(&self) -> &'a str { self.inner } }. Lit attentivement le message d'erreur, il propose souvent l'annotation manquante.
+
+Problème : Comment intercepter un panic sans crash ?
+Solution : std::panic::catch_unwind exécute une closure et retourne Err si elle panique. Utile pour les FFI ou pour isoler des plugins. Attention : la closure doit être UnwindSafe ou wrappée dans AssertUnwindSafe. Ne pas confondre avec une utilisation normale d'erreurs : Result reste la voie idiomatique.
+
+Problème : "cannot infer an appropriate lifetime" sur un return.
+Solution : Ambigüité entre plusieurs lifetimes en entrée. Annote explicitement laquelle survit dans le retour. fn pick<'a, 'b>(x: &'a str, y: &'b str) -> &'a str { x } ici on précise que le retour vit aussi longtemps que x.
+
+Problème : Comment écrire un wrapper transparent autour d'un type ?
+Solution : #[repr(transparent)] sur une struct Wrapper(pub Inner); garantit la même ABI que Inner. Combine avec Deref et DerefMut pour un usage transparent : impl Deref for Wrapper { type Target = Inner; fn deref(&self) -> &Inner { &self.0 } }.
+
+Problème : "use of partially moved value" après une décomposition.
+Solution : Quand tu écris let (a, b) = struct_value; tu déplaces chaque champ. Si tu n'utilises que a, b reste dans l'original mais l'original est partiellement moved et inutilisable globalement. Solution : utilise let a = &struct_value.a; let b = &struct_value.b; pour borrow, ou clone si besoin.
+
+Problème : Comment supporter à la fois sync et async dans une bibliothèque ?
+Solution : Stratégie maybe-async : crate maybe-async permet de générer les deux versions depuis une seule source. Alternative manuelle : module sync_impl et async_impl avec des features pour activer l'un ou l'autre. reqwest fait ce choix avec blocking comme module séparé.
+
+Problème : Cargo build OK mais cargo doc échoue sur une dépendance.
+Solution : Souvent un mismatch de features entre build et doc. cargo doc active --all-features par défaut, exposant des combinaisons jamais testées. Solutions : cargo doc --no-deps si seul ton crate t'intéresse, ou cargo doc --features "minimal" pour limiter le set.
+
+Problème : Comment implémenter Display pour un type personnalisé ?
+Solution : use std::fmt; impl fmt::Display for MonType { fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { write!(f, "MonType({})", self.valeur) } }. Le write! écrit dans le formateur. Retourner fmt::Result. Ensuite println!("{}", mon_objet) fonctionne.
+
+Problème : "the trait bound ... is not satisfied" pour une contrainte générique.
+Solution : Le compilateur te dit que le type T que tu passes ne satisfait pas le trait requis. Lis le message complet : il dit quel trait manque et pour quel type. Options : implémenter le trait manquant pour ton type, ajouter la contrainte sur T au niveau de la fonction appelante, ou utiliser un type différent qui satisfait le trait.
+
+Problème : Comment formater un nombre avec un nombre précis de décimales ?
+Solution : println!("{:.3}", 3.14159); affiche 3.142. format!("{:08.2}", 3.14) produit "00003.14" (largeur 8, 2 décimales, rembourré de zéros). Pour les séparateurs de milliers, il n'y a pas de format standard ; utilise un formatter personnalisé ou une bibliothèque dédiée.
+
+Problème : struct champs privés depuis un test externe.
+Solution : Les tests dans tests/ sont des crates externes et respectent la visibilité. Pour tester les internals, place les tests dans #[cfg(test)] mod tests { ... } à l'intérieur du fichier source. Ces tests accèdent aux éléments privés via use super::*. Les tests d'intégration dans tests/ ne testent que l'API publique.
+
+Problème : Comment convertir un Vec<Result<T, E>> en Result<Vec<T>, E> ?
+Solution : Utilise collect(). Quand on collecte un iterator d'Option ou Result, Rust peut collecter en Result<Vec<T>, E> : let results: Result<Vec<i32>, _> = vec!["1", "2", "abc"].iter().map(|s| s.parse::<i32>()).collect();. S'arrête au premier Err et le retourne. Pour collecter tous les succès et ignorer les erreurs, utilise filter_map.
+
+Problème : "use of moved value" dans une boucle for.
+Solution : Le for loop consomme l'itérateur et les valeurs si le type n'est pas Copy. Pour garder la collection, itère par référence : for item in &ma_collection. Pour itérer mutablement : for item in &mut ma_collection. Si tu as besoin de move dans la boucle, collecte les transformations dans une autre collection.
+
+Problème : Comment lire un fichier de configuration TOML sans serde ?
+Solution : Implémente un parser minimaliste. Lis ligne par ligne avec BufReader. Détecte les clés avec pattern "clé = valeur". Séquence : let lignes = BufReader::new(fichier).lines(); pour chaque ligne, trim, ignore les lignes commençant par # ou vides, split sur '=' pour séparer clé et valeur. Pour un vrai projet, serde + toml font ce travail robustement.
+
+Problème : Comment déboguer un problème de lifetime obscur ?
+Solution : Commence par simplifier au maximum : retire les niveaux d'abstraction jusqu'à avoir un exemple minimal qui reproduit l'erreur. Lis le message d'erreur ligne par ligne, le compilateur identifie précisément l'origine du conflit. Active les suggestions et applique-les. Utilise des variables intermédiaires explicitement annotées pour forcer les lifetimes et voir si le compilateur accepte.
+
+Problème : Erreur "cannot borrow `x` as mutable more than once at a time".
+Solution : Tu tiens une référence mutable et en crées une deuxième. Solution : laisse sortir la première du scope avant la deuxième. Souvent un { let r = &mut x; utiliser r; } suffit. Depuis NLL, les lifetimes se terminent à la dernière utilisation, donc parfois il suffit de ne plus utiliser la première référence avant de créer la seconde.
+
+Problème : Comment éviter Arc<Mutex<Vec<T>>> pour les performances ?
+Solution : Plusieurs alternatives. Pour les appends fréquents, Mutex<Vec<T>> avec des accès courts est souvent suffisant. Pour les lectures très fréquentes, RwLock<Vec<T>> permet des lectures concurrentes. Pour les cas haute performance, envisage le sharding : plusieurs Mutex<Vec<T>> chacune protégeant une partition. Ou envoi de messages via mpsc si la collection peut être possédée par un seul thread.
+
+Problème : Comment gérer les panics dans un contexte FFI ?
+Solution : Un panic Rust qui traverse une frontière FFI produit un comportement indéfini. Enveloppe le code Rust dans std::panic::catch_unwind : extern "C" fn ma_fonction() -> i32 { match std::panic::catch_unwind(|| mon_code()) { Ok(v) => v, Err(_) => -1 } }. Retourner un code d'erreur et journaliser le panic permet au code C de se comporter correctement.
+
+Problème : Comment implémenter un cache LRU simple sans dépendances ?
+Solution : Utilise un LinkedList pour l'ordre d'accès et un HashMap pour les lookups O(1). Quand un élément est accédé, le déplacer en tête. Quand la capacité est atteinte, supprimer la queue. La complexité : LinkedList en std manque de curseurs stables. En pratique, implémente avec deux structures : un Vec avec indices et un HashMap vers les indices, en gérant manuellement l'ordre d'éviction.
+

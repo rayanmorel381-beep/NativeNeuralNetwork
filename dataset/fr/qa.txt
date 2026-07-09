@@ -1,0 +1,170 @@
+Questions et réponses fréquentes sur Rust
+
+Q : Pourquoi mon code refuse de compiler avec une erreur "cannot borrow as mutable" ?
+R : Le borrow checker a détecté qu'une référence immuable existe en même temps qu'une tentative de référence mutable. Rust impose l'invariant strict d'aliasing XOR mutability. Soit plusieurs lecteurs simultanés, soit un seul écrivain, jamais les deux. Restructure ton code pour terminer l'usage immuable avant la mutation, ou utilise un split_at_mut, ou recours à RefCell si la vérification dynamique convient.
+
+Q : Quand devrais-je écrire un trait plutôt qu'un enum ?
+R : Trait si tu veux étendre l'ensemble des implémentations sans modifier le code central (open principle), si chaque variante a un comportement différent et que tu ne veux pas exhaustivement matcher. Enum si l'ensemble des variantes est fixe et connu à la compilation, si tu veux exhaustiveness checking, ou si les variantes contiennent peu de données et tu veux éviter l'allocation Box<dyn>.
+
+Q : Pourquoi Rust impose UTF-8 partout dans String ?
+R : Pour éliminer une classe entière de bugs liés à l'encodage. Toutes les opérations sur String supposent UTF-8 valide. Si tu charges des bytes d'origine inconnue, garde un Vec<u8> jusqu'à validation explicite via String::from_utf8 ou std::str::from_utf8. Une String invalide UTF-8 est de l'unsafe undefined behavior.
+
+Q : Comment éviter le clone partout dans mon code ?
+R : Réfléchis à qui possède quoi. Si une fonction n'a besoin que de lire, prends &T. Si elle a besoin de modifier sans posséder, prends &mut T. Le clone est légitime pour les types Copy (gratuit), pour les types peu coûteux à cloner (Rc, Arc, String courte), ou pour rompre des cycles d'emprunt qui résisteraient sinon à toute restructuration.
+
+Q : Mon programme compile mais panique au runtime, comment je débogue ?
+R : Active RUST_BACKTRACE=1 pour obtenir la stack trace complète, RUST_BACKTRACE=full pour inclure les frames internes. Compile en debug pour avoir les numéros de ligne. Utilise dbg! pour inspecter les valeurs intermédiaires. Pour les panics dans les threads, vérifie que le main attend les JoinHandle, sinon le programme se termine en silence.
+
+Q : Comment paralléliser un calcul facilement ?
+R : Pour le calcul CPU-bound, rayon est la solution canonique. Il fournit par_iter et compagnie, drop-in pour iter, avec un work-stealing scheduler. Pour le calcul IO-bound, async/await avec tokio. Pour les patterns producteur-consommateur, channels mpsc ou crossbeam_channel pour MPMC.
+
+Q : Quelle différence entre Vec::new et Vec::with_capacity ?
+R : Vec::new alloue rien initialement. Le premier push alloue, et chaque dépassement de capacité réalloue en doublant. Vec::with_capacity(n) pré-alloue pour n éléments. Utilise-la dès que tu connais une borne raisonnable de la taille finale, ça évite les reallocations et les copies répétées.
+
+Q : Comment gérer les erreurs dans un projet de production ?
+R : Pattern recommandé : pour les bibliothèques, définis ton propre enum d'erreurs avec thiserror, qui implémente Error, Display et From automatiquement. Pour les binaires, utilise anyhow::Error qui efface le type et fournit un contexte enrichi via .context. Évite Box<dyn Error> pour les API publiques, c'est moins ergonomique que tes propres types.
+
+Q : impl Trait en argument versus generic, quelle différence ?
+R : fn f(x: impl Trait) est strictement équivalent à fn f<T: Trait>(x: T) côté générateur. La différence est syntaxique et de turbofish : la version impl ne permet pas f::<Concret> au site d'appel. Préfère impl pour la lisibilité quand tu n'as pas besoin de référer au paramètre.
+
+Q : Cargo build prend des minutes, comment accélérer ?
+R : cargo check au lieu de cargo build pendant l'itération (ne lie pas). Réduis les codegen-units en debug à 256 ou plus pour paralléliser. Active sccache pour cacher les artefacts. Désactive le LTO en debug. Ajoute mold ou lld comme linker (rustflags = ["-C", "link-arg=-fuse-ld=mold"]). Évite les features inutiles des crates lourdes.
+
+Q : Quand passer en async ?
+R : Quand ton code est IO-bound et que tu sers beaucoup de tâches concurrentes (serveur web, client multi-connexion). Pour du calcul CPU pur, async n'apporte rien : utilise des threads ou rayon. Pour un script CLI qui fait un appel HTTP, sync avec ureq ou reqwest::blocking est plus simple et tout aussi performant.
+
+Q : Comment éviter la pollution Box<dyn Error> dans mes signatures ?
+R : Définis un type Result personnalisé : type Result<T> = std::result::Result<T, MonErreur>. Toutes tes fonctions retournent Result<T>. MonErreur est un enum avec From pour chaque erreur sous-jacente. Le ? convertit automatiquement.
+
+Q : Une struct avec une référence interne, comment la déclarer ?
+R : struct Wrapper<'a> { data: &'a Donnees }. La lifetime 'a doit apparaître dans la déclaration et dans toutes les méthodes. Si tu sens que tu as besoin que la struct possède ET référence sa propre donnée, c'est un self-referential et c'est interdit par le borrow checker. Solutions : indices, Rc, ou Pin avec une crate dédiée.
+
+Q : Comment écrire des tests d'intégration ?
+R : Crée un répertoire tests/ à la racine du crate. Chaque fichier .rs y est compilé comme un crate séparé qui dépend de ton crate public. Idéal pour tester l'API publique sans accès aux internals. Pour partager du code entre tests, mets-le dans tests/common/mod.rs et importe avec mod common.
+
+Q : Comment publier sur crates.io ?
+R : Crée un compte, génère un token, cargo login. Vérifie que Cargo.toml a name, version, edition, description, license, repository. cargo publish --dry-run pour valider. Puis cargo publish. La publication est définitive : une version ne peut pas être supprimée, seulement yanked.
+
+Q : Quelle stratégie pour les features Cargo ?
+R : Features additives uniquement. Activer une feature ne doit jamais désactiver de comportement. Pas de features mutuellement exclusives (sinon les unifications entre dépendances cassent). Pour les choix mutuellement exclusifs, expose plutôt plusieurs crates ou des modules séparés.
+
+Q : impl<T> Foo for T va casser quelle règle ?
+R : Souvent l'orphan rule si Foo n'est pas défini dans ton crate. Ou des conflits avec d'autres impls. Cette impl blanket capture absolument tous les types, ce qui empêche toute spécialisation future. Préfère impl<T: Trait> Foo for T avec une contrainte.
+
+Q : Comment partager des données entre threads ?
+R : Pour de la lecture seule, Arc<T>. Pour de la mutation rare, Arc<RwLock<T>>. Pour de la mutation fréquente sous contention, Arc<Mutex<T>>. Pour des compteurs atomiques sans verrou, AtomicUsize. Pour des structures lock-free, crossbeam fournit des skiplist, queue, deque.
+
+Q : Pourquoi tokio::spawn nécessite Send + 'static ?
+R : Send parce que le scheduler peut migrer la task d'un worker thread à un autre. 'static parce que la task peut survivre arbitrairement longtemps, donc ne peut pas tenir des références vers la pile de l'appelant. Pour borrow des données locales, utilise tokio::task::spawn_blocking avec scope, ou std::thread::scope en sync.
+
+Q : Comment réduire la taille d'un binaire WASM ?
+R : Profile release avec opt-level = "z", lto = true, codegen-units = 1, panic = "abort", strip = "symbols". Ajoute wasm-opt en post-traitement. Évite std::fmt et String::format qui amènent beaucoup de code. Pour des binaires minuscules, considère no_std avec une libc minimale.
+
+Q : Quand utiliser BTreeMap plutôt que HashMap ?
+R : BTreeMap quand tu as besoin de l'ordre des clés (iteration triée, range queries), quand les clés sont des nombres ou strings courtes (cache-friendly), ou quand tu veux des performances constantes prévisibles (HashMap a un coût de rehashing occasionnel). HashMap pour le cas général O(1) amorti.
+
+Q : Comment instrumenter mon code pour observabilité ?
+R : tracing pour les spans et events structurés. tracing-subscriber pour configurer la sortie (console, JSON, OpenTelemetry). metrics ou prometheus pour les compteurs et histogrammes. Active tokio-console pour inspecter le runtime async en live.
+
+Q : Comment écrire du code Rust portable cross-platform ?
+R : Évite les paths hardcodés, utilise std::path::PathBuf. Pour les fins de ligne, utilise writeln! plutôt qu'un \n manuel. Pour les commandes systèmes, std::process::Command avec arguments séparés. Teste sur les trois OS principaux via GitHub Actions matrix. Utilise cfg(target_os = "...") quand absolument nécessaire, en isolant dans des modules.
+
+Q : Comment éviter le bloat des dépendances ?
+R : Examine cargo tree régulièrement pour identifier les transitives lourdes. Désactive les features par défaut avec default-features = false et n'active que celles nécessaires. Préfère les crates micro-spécialisées aux frameworks all-in-one. Pour les CLI, considère clap avec derive seul, sans builder.
+
+Q : Une bibliothèque doit-elle exposer ses types d'erreur ?
+R : Oui. Un Box<dyn Error> opaque est très limitant pour les consommateurs qui veulent matcher sur des cas spécifiques. Un enum public bien nommé avec thiserror est la norme. Marque-le #[non_exhaustive] pour pouvoir ajouter des variantes sans bump majeur.
+
+Q : Cargo workspace ou monorepo classique ?
+R : Workspace si les crates partagent un release cycle et compilent ensemble. Polyrepo si les crates ont des cycles indépendants et veulent versionning séparé strict. Pour la plupart des projets internes, workspace gagne en simplicité et performance.
+
+Q : Pourquoi mes futures Send compilent mais pas les non-Send ?
+R : tokio::spawn requiert Send pour pouvoir migrer la task entre threads. Si ta future capture un Rc, un MutexGuard ou un RefCell.borrow_mut, elle n'est pas Send. Solutions : Arc à la place de Rc, drop explicite du guard avant l'await, ou utilise tokio::task::spawn_local sur un LocalSet single-threaded.
+
+Q : Comment gérer les panics en production ?
+R : Installe un panic hook via std::panic::set_hook qui log l'incident, envoie une métrique, et idéalement notifie un système d'alerting. En async tokio, le panic d'une task n'affecte pas les autres, mais le JoinHandle retourne Err(JoinError). Audit régulièrement avec cargo clippy -W clippy::unwrap_used.
+
+Q : Que faire face à un message d'erreur cryptique sur les traits ?
+R : Active --explain avec le code d'erreur (E0277 par exemple). Lis attentivement la chaîne d'obligations affichée par le compilateur ; chaque ligne dit "X requires Y because Z". Souvent le problème est qu'une contrainte profonde n'est pas satisfaite. Essaie d'isoler dans un MCVE et de simplifier jusqu'à comprendre.
+
+Q : Async runtime, lequel choisir ?
+R : tokio pour le standard de facto, écosystème massif, performant, multi-thread par défaut. async-std pour une API proche de std. smol pour la minimalisme. embassy pour l'embarqué. Pour un nouveau projet sans contrainte, tokio est le choix par défaut sans discussion.
+
+Q : Comment implémenter un pattern Builder en Rust ?
+R : Crée une struct builder avec des setters qui consomment et retournent self, puis une méthode build() finale. struct Config { host: String, port: u16 } struct ConfigBuilder { host: String, port: u16 } impl ConfigBuilder { fn new() -> Self { Self { host: "localhost".into(), port: 8080 } } fn host(mut self, h: &str) -> Self { self.host = h.into(); self } fn port(mut self, p: u16) -> Self { self.port = p; self } fn build(self) -> Config { Config { host: self.host, port: self.port } } }. Usage: ConfigBuilder::new().host("prod").port(443).build().
+
+Q : Quelle est la différence entre iter(), iter_mut() et into_iter() ?
+R : iter() produit des références immuables &T sans consommer la collection. iter_mut() produit des références mutables &mut T. into_iter() consomme la collection et produit des valeurs T par move. Pour itérer en réutilisant la collection après, utilise iter() ou iter_mut(). Si tu n'en as plus besoin, into_iter() évite de cloner.
+
+Q : Comment implémenter From et Into pour ses propres types ?
+R : Implémente From<SourceType> for DestType, et Into est fourni automatiquement. impl From<&str> for NomType { fn from(s: &str) -> Self { NomType(s.to_string()) } }. Ensuite let n: NomType = "Alice".into(); fonctionne. L'opérateur ? utilise From pour la conversion d'erreurs automatique.
+
+Q : Qu'est-ce que l'aliasing en unsafe et pourquoi est-ce dangereux ?
+R : Deux references mutables vers la même mémoire constituent un aliasing non défini. En safe Rust, c'est impossible. En unsafe, un raw pointer *mut T peut être dupliqué, créant deux chemins d'accès à la même mémoire. Le compilateur peut alors réordonner les opérations en supposant l'absence d'aliasing, produisant un comportement indéfini. La règle : en unsafe, respecte les mêmes invariants de borrow que le safe Rust.
+
+Q : Pourquoi derive Clone mais implémenter Copy manuellement ne fonctionne pas ?
+R : Copy est un marker trait sans méthodes. Il indique que le type se copie par bitwise copy. Il ne peut être implémenté que si tous les champs sont Copy. Tenter impl Copy for MyType {} avec un champ String échoue car String n'est pas Copy (elle owne une allocation heap). La contrainte est au niveau des champs, pas de l'implémentation.
+
+Q : Comment utiliser std::mem::swap et std::mem::replace ?
+R : mem::swap(&mut a, &mut b) échange deux valeurs sans cloner. mem::replace(&mut place, new_value) remplace place par new_value et retourne l'ancienne valeur. Utile dans les patterns état : let old = mem::replace(&mut self.state, State::Processing); Évite les emprunts croisés complexes.
+
+Q : C'est quoi un type fantôme (PhantomData) ?
+R : PhantomData<T> est un champ de taille nulle qui signal au compilateur que la struct "détient" T d'une certaine façon, sans en stocker une valeur. Cas d'usage : struct Handle<T> { raw: *mut (), _phantom: PhantomData<T> }. Cela affect la variance, le drop check, et les règles Send/Sync. Sans PhantomData, le compilateur ne saurait pas que Handle<T> doit se comporter comme s'il contenait T.
+
+Q : Comment éviter les .clone() excessifs sur des String ?
+R : Utilise &str plutôt que String pour les paramètres qui n'ont pas besoin d'ownership : fn process(s: &str). Utilise Cow<'_, str> quand la fonction parfois retourne le string original tel quel et parfois le modifie. Le Cow ne clone que si une modification survient. Pour les identifiants fréquemment dupliqués, considère l'internement via un HashSet<String> partagé.
+
+Q : Qu'est-ce que le "two-phase borrowing" ?
+R : C'est une amélioration du borrow checker (NLL) qui permet certains patterns auparavant rejetés. Exemple : v.push(v.len()); était invalide avant NLL. Le two-phase borrow sépare la réservation d'un emprunt mutable (au point d'usage potentiel) de son activation (au point d'utilisation réelle). Permet des patterns de self-reference limités.
+
+Q : Comment partager des données immuables entre de nombreux threads efficacement ?
+R : Arc<T> suffit si T est Sync. Les clones d'Arc sont légers (incrémentent un compteur atomique). Tous les threads lisent la même donnée sans copie. Si la donnée est statique et connue à la compilation, une &'static T est encore mieux (zéro coût). OnceLock<T> permet d'initialiser une donnée globale une seule fois de manière thread-safe.
+
+Q : Quelle est la différence entre panic! et Result dans la gestion d'erreurs ?
+R : Result est pour les erreurs récupérables attendues : fichier absent, entrée invalide, timeout réseau. Le code appelant doit les gérer. panic! est pour les invariants violés : index hors bornes, division par zéro, assertion échouée. En bibliothèque, quasi jamais de panic. En binaire, panic uniquement pour des bugs internes.
+
+Q : Comment fonctionne le trait Iterator et comment implémenter le sien ?
+R : Implémenter Iterator nécessite seulement next(&mut self) -> Option<Self::Item>. Toutes les autres méthodes (map, filter, take, zip, fold, etc.) sont fournies gratuitement par des implémentations par défaut. Un itérateur personnalisé peut représenter des séquences infinies, des générateurs avec état, ou des vues de structures complexes.
+
+Q : Pourquoi std::collections::HashMap n'est-il pas ordonné ?
+R : HashMap utilise un algorithme de hachage (SipHash par défaut) et répartit les clés dans des buckets. L'ordre d'itération dépend du hash et de l'état interne, pas de l'ordre d'insertion. Pour un ordre d'insertion garanti, utilise indexmap::IndexMap. Pour un ordre alphabétique, utilise BTreeMap qui maintient les clés triées en O(log n).
+
+Q : Comment dimensionner un Vec pour éviter les réallocations ?
+R : Vec::with_capacity(n) alloue d'emblée de la place pour n éléments. Utilise-le quand tu connais le volume approximatif à l'avance. vec.reserve(additional) agrandit la capacité si nécessaire sans perdre les éléments existants. vec.shrink_to_fit() réduit l'allocation à la taille réelle si tu as over-alloué.
+
+Q : Qu'est-ce que le trait Deref et pourquoi est-il important ?
+R : Deref<Target=T> permet la coercion automatique. Box<T> implémente Deref<Target=T>, donc &Box<T> coerce vers &T. String implémente Deref<Target=str>, donc &String coerce vers &str. Vec<T> coerce vers &[T]. Ces coercions se chaînent : &Box<String> coerce vers &str en deux étapes. C'est la fondation de l'ergonomie des smart pointers en Rust.
+
+Q : Comment écrire du code générique qui fonctionne avec plusieurs types de collections ?
+R : Utilise les traits d'abstraction : IntoIterator pour tout ce qui peut être itéré, FromIterator<T> pour tout ce qui peut être construit depuis un itérateur, Extend<T> pour ce à quoi on peut ajouter des éléments. fn process<I: IntoIterator<Item=u32>>(items: I) accepte Vec, slice, HashSet, ou tout itérateur custom.
+
+Q : Quelle est la différence entre Cell et RefCell ?
+R : Cell<T> fournit la mutabilité intérieure par valeur : get() et set() copient la valeur. Requiert T: Copy. Zéro coût runtime, pas de vérification. RefCell<T> fournit la mutabilité intérieure par référence : borrow() retourne une référence immuable, borrow_mut() une référence mutable. Vérifie les règles de borrow à l'exécution, panique si violées.
+
+Q : Comment optimiser la taille d'un enum Rust ?
+R : Le compilateur optimise automatiquement : Option<Box<T>> est la même taille qu'un pointeur (null optimization). Option<NonZeroU32> est la même taille que u32. Pour les enums avec beaucoup de variants, place les données volumineuses derrière Box pour réduire la taille totale au plus grand discriminant plus un pointeur.
+
+Q : Qu'est-ce que impl Trait en position de retour ?
+R : fn make_adder(x: i32) -> impl Fn(i32) -> i32 { move |y| x + y } retourne une closure sans nommer son type exact. Le caller sait seulement que c'est un Fn(i32)->i32. Idéal pour retourner des closures et des iterators sans allouer (contrairement à Box<dyn Fn>). Limitation : une seule branche de retour peut utiliser ce mécanisme.
+
+Q : Comment déboguer les problèmes de performances liés au cache CPU ?
+R : Les structures de données cache-friendly stockent les données accédées ensemble de manière contiguë. Vec<Struct> est moins cache-friendly que plusieurs Vec parallèles (structure of arrays) si tu n'accèdes qu'à certains champs. Les indirections (Box, Rc, trait objects) cassent la localité. Utilise cargo-flamegraph et perf stat pour mesurer les cache misses.
+
+Q : Quelle est la différence entre les channels sync et async ?
+R : std::sync::mpsc::channel() est un channel synchrone : send() est non-bloquant, recv() bloque le thread jusqu'à réception. En async avec tokio::sync::mpsc, send().await et recv().await suspendent la task sans bloquer le thread. Le channel async permet à d'autres tasks de s'exécuter pendant l'attente. Pour communiquer entre contextes sync et async, utilise try_send() ou les variantes non-bloquantes.
+
+Q : Comment utiliser des feature flags dans Cargo.toml ?
+R : Déclare les features dans [features] : optional-crypto = ["dep:sha2"]. Rends une dépendance optionnelle avec sha2 = { version = "0.10", optional = true }. Dans le code : #[cfg(feature = "optional-crypto")] active des blocs conditionnellement. Les utilisateurs activent la feature avec features = ["optional-crypto"] dans leur Cargo.toml.
+
+Q : Qu'est-ce que l'unsafe Rust et quand l'utiliser ?
+R : Unsafe permet cinq opérations interdites en safe Rust : déréférencer un raw pointer, appeler une fonction unsafe, implémenter un unsafe trait, accéder à une static mut, accéder aux champs d'une union. À utiliser uniquement quand tu peux prouver que les invariants sont maintenus manuellement. Encapsule toujours l'unsafe dans une API safe publique.
+
+Q : Comment tester du code qui utilise des traits en mockant les dépendances ?
+R : Définis un trait pour la dépendance. En production, l'impl concrète. En test, une impl mock dans le module de test. struct MockDb { appels: Vec<String> } impl Db for MockDb { fn get(&self, id: &str) -> Option<Valeur> { ... } }. Pas besoin de bibliothèque de mocking ; la composition de traits suffit.
+
+Q : Pourquoi les types Rust n'implémentent-ils pas automatiquement Clone ?
+R : Clone doit être explicite parce que cloner une valeur peut être coûteux ou sémantiquement incorrect. Un fichier ouvert, un lock Mutex, ou une connexion réseau ne doivent pas se cloner naïvement. #[derive(Clone)] fonctionne si tous les champs implémentent Clone. L'opt-in force le développeur à réfléchir au coût et à la sémantique du clonage.
+
+Q : Comment gérer des timeouts dans du code async Rust ?
+R : tokio::time::timeout(Duration, future).await retourne Err(Elapsed) si la durée est dépassée. Combine avec ? pour propager. Pour des timeouts récurrents, tokio::time::sleep(d).await en arrière-plan avec tokio::select! permet de choisir entre la première future terminée. sleep_until prend un Instant précis pour les deadlines absolues.
+

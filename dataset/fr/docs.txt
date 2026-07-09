@@ -1,0 +1,218 @@
+Bibliothèque standard Rust et documentation de programmation système
+
+Primitives de langage de base et système de types
+
+Types primitifs et sécurité des types
+
+Le système de types de Rust permet de vérifier l'exactitude du programme au moment de la compilation. Les types scalaires incluent des entiers (i8, i16, i32, i64, i128, u8, u16, u32, u64, u128), des nombres à virgule flottante (f32, f64), des booléens (bool) et des caractères (char). Chaque type a une portée spécifique et des garanties de précision. Le comportement de débordement dépend du mode de construction : panique des builds de débogage, wrap des builds de publication.
+
+Les types composés regroupent les valeurs. Les tuples regroupent des valeurs hétérogènes de longueur fixe. Les structures organisent les champs nommés. Les énumérations représentent des variantes avec des données associées facultatives. Les tableaux stockent des valeurs homogènes avec une longueur connue au moment de la compilation. Les tranches représentent des vues de taille dynamique dans des tableaux sans propriété. Les tranches permettent aux algorithmes de travailler sur des séquences quel que soit le stockage de sauvegarde.
+
+L'inférence de type détermine les types à partir du contexte d'utilisation, réduisant ainsi les annotations explicites. Le vérificateur de type prouve les propriétés de sécurité des types au moment de la compilation. Les types génériques reportent la spécialisation au temps de monomorphisation. Les limites des traits contraignent les paramètres de type générique, garantissant le polymorphisme au moment de la compilation. La syntaxe Turbofish ::<T> force les paramètres de type explicites lorsque l'inférence échoue.
+
+Traitement des chaînes et du texte
+
+La chaîne représente un texte UTF-8 propriétaire et mutable sur le tas. String::new crée des chaînes vides ; String::from constructions de &str. String implémente Deref<Target=str>, fournissant des conversions automatiques. String::push_str(s) ajoute une tranche de chaîne. String::push(c) ajoute un seul caractère. L'itérateur chars produit des valeurs scalaires Unicode. L'itérateur bytes produit des octets bruts. La complexité du codage UTF-8 signifie que l'indexation des chaînes par position d'octet nécessite des modèles non sécurisés ou d'itérateur.
+
+&str est une tranche de chaîne UTF-8 immuable. Les littéraux de chaîne sont &'static str, leurs données sont compilées en binaire. La création de &str à partir de String nécessite l'emprunt : &my_string. Les tranches de chaîne fonctionnent avec les méthodes str sans copie. L'itérateur split divise les chaînes par modèles ; split_whitespace sépare par des espaces. L'itérateur de lignes traite le texte ligne par ligne. La correspondance de modèles sur &str permet un traitement de texte sophistiqué. La chaîne contient et commence par vérifier l'adhésion.
+
+Le formatage combine les valeurs en chaînes de manière ergonomique. format! renvoie une String avec la sortie formatée. println! écrit sur la sortie standard avec un saut de ligne. print! écrit sans saut de ligne. write! et writeln! écrivent dans un Writer arbitraire. Les spécificateurs de format contrôlent l'apparence de la sortie. Le trait Display fournit le formatage par défaut destiné aux utilisateurs ; Debug fournit un formatage destiné aux développeurs. {} utilise Display, {:?} utilise Debug, {:#?} active le pretty-print indenté.
+
+Collections et types de conteneurs
+
+Vec<T> fournit des baies évolutives avec un stockage contigu. L'allocation s'effectue sur le tas ; la capacité augmente de façon exponentielle. push() s'ajoute au coût O(1) amorti. pop() supprime et renvoie le dernier élément. get() indexe en toute sécurité avec Option. Indexation directe avec [i] paniques hors limites. L'itération est idiomatique avec les boucles for-in. La déstructuration décompresse les éléments vec. collect() consomme les itérateurs créant des collections à partir de leur sortie.
+
+HashMap<K, V> fournit un stockage clé-valeur efficace avec une recherche et une insertion O(1) moyennes. Le hachage détermine le placement du compartiment. Chaîne de collisions dans les seaux. L'itération produit des paires clé-valeur dans un ordre arbitraire. L'itération mutable permet une modification sur place. L'API Entry permet une insertion et des mises à jour conditionnelles efficaces. insert() et get() sont les opérations principales.
+
+HashSet<T> conserve des valeurs uniques sans données associées. Les opérations d'ensemble telles que l'union, l'intersection et la différence combinent efficacement des ensembles. La vérification de l'adhésion avec contain() est une moyenne de O(1). L'itération donne des valeurs dans un ordre arbitraire. Conserver les valeurs des filtres en place.
+
+BTreeMap<K, V> conserve les paires clé-valeur ordonnées. L'itération est triée par clé. Les requêtes de plage renvoient efficacement des sous-ensembles d'entrées à l'aide de range(). BTreeSet<T> conserve les valeurs uniques ordonnées. La structure B-tree équilibre l’efficacité de la mémoire et l’efficacité de la recherche. BTreeMap fonctionne mieux avec de grands ensembles de données et des requêtes de plage.
+
+Des listes chaînées sont disponibles mais rarement recommandées. VecDeque<T> fournit des opérations efficaces à double extrémité, en poussant et en éclatant des deux extrémités. Les collections de bibliothèques standard documentent avec précision les caractéristiques de performance. La plupart des algorithmes devraient préférer Vec ou les tableaux pour l'efficacité du cache.
+
+Pointeurs intelligents et gestion de la mémoire
+
+Box<T> fournit une allocation de tas. La boxe permet les types récursifs, les objets de trait et le déplacement de grandes valeurs. Box déréférence automatiquement vers T. Boxing n'a aucun coût d'exécution au-delà de l'allocation et de l'indirection. Box::leak se convertit en &'static T de manière permanente, utile pour l'initialisation statique.
+
+Rc<T> active le comptage de références pour la propriété partagée. Plusieurs pointeurs Rc font référence à la même valeur. Lorsque le dernier Rc chute, la valeur est libérée. Rc nécessite des contextes monothread. Rc::clone incrémente le nombre de références sans copie approfondie. Rc::strong_count interroge les références actives. Les cycles empêchent la désallocation ; Faible empêche les cycles.
+
+Arc<T> est un comptage de références thread-safe. Arc<T> implémente Send et Sync si T le fait. Arc::clone fonctionne au-delà des limites des threads. Arc<Mutex<T>> active un état mutable partagé entre les threads. Arc<RwLock<T>> autorise plusieurs lecteurs simultanés ou rédacteurs exclusifs.
+
+Weak<T> crée des références non propriétaires aux valeurs Rc ou Arc. Des références faibles empêchent les cycles d’empêcher la désallocation. Weak::upgrade renvoie Option<Rc<T>> ou Option<Arc<T>>. Les cycles de références fortes provoquent des fuites de mémoire ; Faible empêche cela.
+
+Cell<T> offre une mutabilité intérieure pour les types Copy sans surcharge. RefCell<T> applique les règles d'emprunt au moment de l'exécution, paniqueant en cas de violations. UnsafeCell<T> fournit une mutabilité intérieure sans vérification du code dangereux.
+
+Itérateurs et programmation fonctionnelle
+
+Les itérateurs fournissent des transformations paresseuses et chaînables sur des séquences. iter() emprunte des éléments de manière immuable. iter_mut() emprunte des éléments de manière modifiable. into_iter() consomme la collection. Les itérateurs personnalisés implémentent le trait Iterator. La méthode next() génère des éléments ; le retour de None termine l'itération.
+
+Les méthodes d’adaptateur transforment les itérateurs sans les consommer. map() transforme chaque élément selon une fermeture. filter() conserve les éléments satisfaisant les prédicats. take() limite la longueur de l'itération à n éléments. skip() omet les n éléments initiaux. flatten() enchaîne les itérateurs imbriqués. zip() associe des éléments de plusieurs itérateurs.
+
+Les méthodes de consommation épuisent les itérateurs produisant des résultats. collect() construit des collections à partir d'itérateurs. sum() et product() accumulent des valeurs. any() et all() vérifient les prédicats. find() renvoie la première correspondance. Fold() et Reduction() accumulent des valeurs avec des opérations. count() donne la longueur de l'itération.
+
+Les fermetures capturent les variables d'environnement permettant des modèles de programmation fonctionnels. déplacer les fermetures transférer les variables capturées dans la fermeture. Les traits Fn décrivent le comportement de fermeture. Les fermetures Fn prennent des références immuables. Les fermetures FnMut prennent des références mutables. Les fermetures FnOnce consomment les valeurs capturées.
+
+Gestion des erreurs et récupération
+
+Result<T, E> représente le succès avec T ou l'échec avec E. La variante Ok(T) contient des valeurs de succès. La variante Err(E) contient des erreurs. Le ? L'opérateur propage les erreurs, renvoyant Err s'il est rencontré. unwrap() panique sur Err. unwrap_or() fournit les valeurs par défaut. map() et and_then() transforment les résultats.
+
+Option<T> représente Some(T) ou None, éliminant les bogues de pointeur nul. Une variante contient une valeur. Aucun ne représente l'absence. Les méthodes optionnelles incluent map(), filter(), and_then() et unwrap(). Variantes de requête is_some() et is_none().
+
+Les types d’erreur personnalisés implémentent le trait Error. L'affichage fournit des messages destinés à l'utilisateur. Debug fournit des diagnostics aux développeurs. source() enchaîne les erreurs révélant les causes profondes. Les implémentations permettent une conversion ergonomique vers les types d'erreurs.
+
+La panique concerne les erreurs irrécupérables du programmeur. panique! déroule immédiatement la pile. catch_unwind permet une récupération de panique dans des contextes limités. PanicInfo capture les détails de la panique. La plupart du code doit utiliser Result pour la gestion des erreurs.
+
+E/S de fichiers et opérations système
+
+File::open ouvre les fichiers en lecture ou en écriture. Les options contrôlent le comportement d'ouverture : create() crée s'il est manquant, truncate() efface, append() s'ouvre pour l'ajout. FileMetadata interroge les autorisations, la taille et les horodatages. La lecture remplit les tampons avec des octets. L'écriture envoie des octets aux fichiers.
+
+BufReader et BufWriter tamponnent les E/S, réduisant ainsi les appels système. read_line() lit jusqu'à la nouvelle ligne. read_to_string() lit des fichiers entiers en chaînes. write_all() écrit des tampons complets. flush() garantit que les données mises en mémoire tampon atteignent les fichiers immédiatement.
+
+Path et PathBuf gèrent la syntaxe de chemin spécifique à la plate-forme. Poignées d’analyse des composants .. et . correctement. Propriétés du fichier de requêtes de métadonnées. Les autorisations contrôlent l’accès. Le parcours des répertoires utilise read_dir() pour le contenu du répertoire et WalkDir pour le parcours récursif.
+
+La commande génère des processus du système d’exploitation. stdin(), stdout(), stderr() contrôlent les E/S du sous-processus. wait() bloque jusqu'à la fin. output() capture stdout et stderr. Les tuyaux connectent les E/S du sous-processus. Les variables d'environnement passent la configuration.
+
+Concurrence et synchronisation
+
+std::thread::spawn crée des threads du système d'exploitation. JoinHandle attend la fin du thread. Les paniques dans les discussions sont contenues ; ils ne font pas planter le programme. Les fermetures avec déplacement du mot-clé transfèrent la propriété aux threads, ce qui sécurise le partage de données entre threads.
+
+Les canaux permettent la transmission de messages. L'expéditeur envoie des valeurs ; Le récepteur obtient des valeurs. Les canaux mpsc (multi-producteur, mono-consommateur) autorisent plusieurs expéditeurs. crossbeam fournit des types de canaux supplémentaires. L’envoi transfère la propriété empêchant les courses aux données. Les canaux se déconnectent lorsque tous les expéditeurs abandonnent, ce qui fait que Receiver::recv() renvoie Err.
+
+Mutex<T> fournit une exclusion mutuelle. lock() bloque jusqu'à ce que le verrou soit acquis. MutexGuard impose que T soit accessible uniquement tout en maintenant le verrou. Les protections de verrouillage se libèrent automatiquement en cas de chute. Des blocages se produisent en cas d'ordre de verrouillage incorrect.
+
+RwLock<T> autorise plusieurs lecteurs ou un seul écrivain. read() acquiert des verrous de lecture. write() acquiert des verrous en écriture. Les lecteurs ne se bloquent pas. Les écrivains ont un accès exclusif.
+
+Les types atomiques permettent une synchronisation sans verrouillage. AtomicBool, AtomicU32 et similaires fournissent des opérations atomiques. compare_and_swap active les mises à jour conditionnelles. L'ordre contrôle l'ordre de la mémoire (Relaxed, Release, Acquire, SeqCst).
+
+Codes dangereux et interfaces de fonctions étrangères
+
+Les blocs dangereux contournent la vérification des emprunts. Les pointeurs bruts (*const T, *mut T) nécessitent un déréférencement explicite. Le déréférencement de pointeurs non valides entraîne un comportement indéfini. L'arithmétique du pointeur contourne les vérifications des limites.
+
+Les fonctions non sécurisées nécessitent des appels non sécurisés. L'appel de fonctions C nécessite des blocs "C" externes. Les signatures de fonction doivent correspondre précisément aux déclarations C. Arguments rassemblés entre les types Rust et C. Les valeurs de retour sont converties de la même manière.
+
+bindgen automatise la génération de liaisons Rust à partir des en-têtes C. bindgen analyse le code C émettant des déclarations Rust FFI. Le comportement personnalisé ajuste les liaisons. Les types d'emballage améliorent la sécurité.
+
+Les pointeurs nuls dans C mappent vers Option dans Rust. Les types C opaques deviennent des pointeurs vides. Les rappels nécessitent des pointeurs de fonction ou des objets de trait. La propriété de la mémoire traverse soigneusement les frontières linguistiques.
+
+Macros et méta-programmation
+
+macro_rules ! définit des macros déclaratives. Les modèles correspondent aux flux de jetons. L'expansion remplace les modèles par le code généré. Les opérateurs de répétition (+, *, ?) correspondent à une ou plusieurs occurrences, zéro ou plusieurs, ou zéro ou une occurrence. L'hygiène évite les conflits de noms générés par les macros.
+
+Les macros procédurales sont des fonctions recevant et produisant des flux de jetons. Les macros derive implémentent automatiquement des traits. Les macros d'attribut transforment les éléments décorés. Les macros de type fonction ressemblent aux appels de fonction en position macro. Le crate proc_macro fournit les API nécessaires.
+
+Les macros récursives se développent à plusieurs reprises. Le débogage des macros utilise cargo expand pour voir le code généré. Les macros complexes exploitent les attributs d'assistance. Les macros de documentation empêchent les messages d'erreur énigmatiques.
+
+Fonctionnalités avancées du système de saisie
+
+Les limites des traits contraignent les types génériques. où les clauses spécifient les limites de manière lisible. Plusieurs limites de traits nécessitent toutes les implémentations. Les limites de durée de vie concernent les paramètres de durée de vie. Les types de soi dans les traits activent les modèles CRTP.
+
+Les types associés réduisent la prolifération des paramètres génériques. Iterator :: Item est un type associé. Les limites des traits font référence aux types associés. Les types associés par défaut simplifient les cas courants. Les limites de type associées contraignent les implémentations.
+
+Les limites des traits de rang supérieur permettent une quantification universelle sur toute la durée de vie. La syntaxe for<'a> indique des limites valables pour toutes les durées de vie. Les types de rappel utilisent souvent HRTB. Le trait Fn utilise HRTB pour toutes les durées de vie d'emprunt.
+
+La variance décrit le moment où les sous-types remplacent les supertypes. La covariance autorise les sous-types dans des positions contravariantes. La contravariance autorise les supertypes dans des positions covariantes. L'invariance interdit la substitution. Les paramètres génériques ont une variance intrinsèque.
+
+Optimisation des performances
+
+Les abstractions à coût nul garantissent que les abstractions sont compilées en un code efficace. Les itérateurs se compilent en boucles. Les génériques monomorphisent le code spécialisé pour les types. Les annotations en ligne guident les décisions du compilateur. Le déroulement des boucles étend les boucles pour améliorer l'efficacité du cache.
+
+Les opérations SIMD accélèrent le calcul data-parallel. Le crate packed_simd fournit des types SIMD explicites. La vectorisation automatique du compilateur reconnaît les boucles vectorisables. Le code SIMD écrit à la main optimise les chemins critiques.
+
+La disposition de la mémoire affecte les performances. L'ordre des champs de structure détermine la taille et la localité du cache. Disposition du contrôle des attributs Repr. Les structures de données clairsemées gaspillent le cache. La mise en cache des valeurs calculées amortit le travail répété.
+
+Le profilage identifie les goulots d'étranglement. La visualisation Flamegraph révèle la consommation de temps. Les benchmarks mesurent de petites sections de code. les compteurs de performances signalent le comportement du cache. Les profileurs statistiques ont une surcharge moyenne.
+
+Documentation de la bibliothèque standard Rust
+
+Module std::collections. HashMap<K, V> stocke des paires clé-valeur avec recherche en O(1) amorti. Les clés doivent implémenter Hash et Eq. La méthode entry() permet d'insérer ou modifier sans double recherche. BTreeMap maintient les clés triées, utile pour les itérations ordonnées. HashSet<T> et BTreeSet<T> sont les versions sans valeurs. VecDeque<T> est une file double-ended efficace. BinaryHeap<T> implémente une file de priorité max-heap.
+
+Module std::io. Le trait Read définit read(), read_exact(), read_to_end(), read_to_string(). Le trait Write définit write(), write_all(), flush(). BufReader et BufWriter ajoutent une couche de bufferisation réduisant les appels système. BufRead ajoute read_line() et lines(). Stdin, Stdout, Stderr sont les handles standard, accessibles via std::io::stdin(), stdout(), stderr(). La macro writeln! émet une ligne avec retour à la ligne sur n'importe quel Write.
+
+Module std::fs. File::open ouvre en lecture. File::create crée ou tronque en écriture. OpenOptions::new() permet de combiner : append, read, write, create, truncate. fs::read_to_string lit un fichier entier. fs::write crée ou remplace un fichier. read_dir retourne un itérateur de DirEntry. create_dir_all crée les répertoires intermédiaires. copy, rename, remove_file, remove_dir_all complètent les opérations courantes.
+
+Module std::path. Path est non-owned, comme str. PathBuf est owned, comme String. path.join("autre") concatène avec le séparateur de la plateforme. path.extension() retourne l'extension sans le point. path.file_name() retourne le nom de fichier. path.parent() retourne le répertoire parent. path.exists(), is_file(), is_dir() testent sans ouvrir.
+
+Module std::thread. thread::spawn prend une closure FnOnce + Send + 'static. JoinHandle::join attend la fin et retourne Result avec la valeur retournée. thread::sleep suspend le thread courant. thread::current().name() donne le nom du thread. thread::available_parallelism() retourne le nombre de cœurs logiques. thread::scope permet des threads avec lifetimes bornées, évitant 'static.
+
+Module std::sync. Mutex<T> garantit l'accès exclusif. lock() bloque jusqu'à l'obtention, retourne MutexGuard qui se libère via Drop. try_lock() ne bloque pas, retourne Err si déjà verrouillé. RwLock<T> distingue lecteurs multiples (read()) d'un écrivain unique (write()). Condvar permet d'attendre une condition et d'être notifié. Barrier synchronise N threads à un point. Once garantit l'exécution unique d'une initialisation.
+
+Module std::sync::atomic. AtomicBool, AtomicI32, AtomicUsize, AtomicPtr. fetch_add, fetch_sub, fetch_and, fetch_or, fetch_xor pour les opérations atomiques Read-Modify-Write. compare_exchange et compare_exchange_weak pour les algorithmes lock-free. Ordering : Relaxed (pas de synchronisation), Acquire/Release (synchronisation producteur-consommateur), SeqCst (ordre total global, le plus fort et le plus coûteux).
+
+Module std::env. var("NOM") retourne Result<String, VarError>. vars() itère toutes les variables. set_var et remove_var modifient l'environnement du processus (non thread-safe en général). args() itère les arguments de ligne de commande, args_os() pour les chemins non-UTF-8. current_dir() et set_current_dir() gèrent le répertoire courant.
+
+Module std::process. Command::new("cmd").arg("arg1").arg("arg2").output() capture stdout, stderr, et le code de retour. spawn() lance sans attendre, retourne un Child. status() attend et retourne ExitStatus sans capturer les sorties. exit(code) termine le processus immédiatement. abort() force l'arrêt sans nettoyage.
+
+Module std::net. TcpListener::bind("0.0.0.0:8080")?.incoming() accepte les connexions. TcpStream implémente Read et Write, donc les opérations IO standard fonctionnent. UdpSocket::bind puis send_to et recv_from pour les datagrams. Toutes les opérations sont bloquantes dans std::net. Pour l'async, tokio::net offre les équivalents non-bloquants.
+
+Module std::time. Instant::now() capture l'heure monotone. elapsed() retourne Duration. Duration::from_secs, from_millis, from_nanos créent des durées. as_secs, as_millis, as_nanos extraient les valeurs. SystemTime::now() donne l'heure système, mais peut reculer contrairement à Instant. Duration implémente Add, Sub, Mul pour l'arithmétique.
+
+Module std::fmt. Le trait Display formate pour les utilisateurs finaux avec {}. Debug formate pour les développeurs avec {:?}. {:?} affiche debug, {:#?} pretty-print. {:b} binaire, {:o} octal, {:x} hexadécimal, {:X} majuscules. {:e} notation scientifique. {:>10} aligne à droite sur 10 caractères, {:<10} à gauche, {:^10} centré. {:0>5} remplit de zéros. {:.3} pour 3 décimales sur les flottants.
+
+Module std::str. split, split_whitespace, splitn découpent. contains, starts_with, ends_with testent. trim, trim_start, trim_end suppriment les espaces. to_uppercase, to_lowercase convertissent. replace, replacen remplacent. parse::<T>() tente une conversion. chars() itère les codepoints Unicode. bytes() itère les octets UTF-8.
+
+Module std::vec. Vec::new() crée vide. Vec::with_capacity(n) pré-alloue. push, pop, insert, remove, swap_remove, retain, dedup, extend, append. truncate et clear réduisent la longueur. capacity vs len. into_iter consomme, iter emprunte, iter_mut emprunte mutuellement. windows(n) et chunks(n) pour les sous-slices. sort, sort_by, sort_by_key pour les tris.
+
+Module std::option. map transforme la valeur si Some. and_then enchaîne les Options. unwrap_or fournit une valeur par défaut. unwrap_or_else appelle une closure. unwrap_or_default utilise Default. filter garde Some si la closure est vraie. ok_or et ok_or_else convertissent en Result. flatten aplatit Option<Option<T>> en Option<T>. zip couple deux Options.
+
+Module std::result. map transforme Ok. map_err transforme Err. and_then enchaîne les opérations qui retournent Result. or_else essaie une alternative en cas d'Err. unwrap_or, unwrap_or_else comme Option. is_ok, is_err testent sans consommer. ok() convertit Result en Option. err() extrait l'erreur en Option.
+
+Module std::iter. Iterator est le trait central avec next() obligatoire. map, filter, take, skip, enumerate, zip, chain, flat_map, fold, scan, peekable, cycle, rev, cloned, copied, take_while, skip_while, step_by. IntoIterator permet la syntaxe for x in collection. FromIterator permet collect vers différentes collections. DoubleEndedIterator ajoute next_back(). ExactSizeIterator ajoute len().
+
+Trait std::clone::Clone. clone() produit une copie indépendante. clone_from(&other) optimise en réutilisant le buffer existant. #[derive(Clone)] génère automatiquement si tous les champs sont Clone. Clone est opt-in, contrairement à Copy.
+
+Trait std::marker::Copy. Types dont le mouvement est une copie bit-à-bit, aucun drop nécessaire. Les types primitifs, les références immuables, les tuples et tableaux de Copy types. Une fois Copy, on ne peut pas avoir un champ non-Copy. Clone est un supertrait de Copy.
+
+Trait std::ops. Add, Sub, Mul, Div, Rem pour l'arithmétique. Neg, Not pour les unaires. BitAnd, BitOr, BitXor, Shl, Shr pour les bits. AddAssign etc. pour les composés. Index et IndexMut pour l'indexation. Deref et DerefMut pour l'auto-déréférencement. Fn, FnMut, FnOnce pour les callables.
+
+Trait std::convert. From<T> définit une conversion infaillible. Into<T> est déduit automatiquement depuis From. TryFrom<T> et TryInto<T> pour les conversions faillibles retournant Result. AsRef<T> et AsMut<T> pour les références légères sans transfert d'ownership.
+
+Module std::mem. size_of::<T>() retourne la taille en octets. align_of::<T>() retourne l'alignement. swap(&mut a, &mut b) échange sans copie intermédiaire. replace(&mut dest, new_val) retourne l'ancienne valeur et installe la nouvelle. take(&mut option) extrait la valeur en laissant None. forget oublie sans Drop, transmute réinterprète bit-à-bit.
+
+Gestion des panics. panic!("message") arrête le thread avec un message. assert! et assert_eq! paniquent si la condition est fausse. unreachable! signale une branche théoriquement inaccessible. todo! et unimplemented! marquent le code non terminé. std::panic::catch_unwind attrape un panic, utile pour les frontières FFI. std::panic::set_hook installe un handler global avant le déroulement.
+
+Bibliothèque standard : Collections détaillées
+
+Vec<T> est le tableau dynamique principal. push() ajoute en fin O(1) amorti. pop() retire en fin O(1). insert(i, v) et remove(i) sont O(n). capacity() retourne la capacité allouée. reserve(n) pré-alloue. retain(|x| condition) supprime en place les éléments ne satisfaisant pas la condition. dedup() supprime les doublons consécutifs (nécessite d'être trié pour tous les doublons). extend(iter) ajoute depuis n'importe quel itérateur.
+
+HashMap<K, V> fournit des lookups O(1) en moyenne. get(&clé) retourne Option<&V>. entry(clé).or_insert(v) insère si absent et retourne &mut V. iter() produit des paires (&K, &V) dans un ordre arbitraire. with_capacity(n) pré-alloue les buckets. contains_key(&clé) teste la présence. remove(&clé) retire et retourne Option<V>.
+
+BTreeMap<K, V> maintient l'ordre trié, opérations O(log n). Utile pour les requêtes de plage : map.range(lo..hi) produit les entrées triées entre lo et hi. BTreeSet<K> est l'équivalent pour les ensembles ordonnés.
+
+VecDeque<T> est une file double. push_front/pop_front et push_back/pop_back tous O(1) amorti. Utile pour BFS ou les fenêtres glissantes. make_contiguous() garantit une tranche contigüe.
+
+HashSet<T> stocke des éléments uniques avec lookup O(1). contains() vérifie la présence. insert() ajoute et retourne false si déjà présent. intersection(), union(), difference() retournent des itérateurs paresseux.
+
+Bibliothèque standard : I/O et fichiers
+
+std::fs::read_to_string(chemin) lit un fichier entier en String. fs::read(chemin) lit en Vec<u8>. fs::write(chemin, data) écrit des octets ou une chaîne. fs::copy(src, dst) copie un fichier. fs::rename(src, dst) déplace. fs::remove_file(chemin) supprime. fs::create_dir_all(chemin) crée le répertoire et ses parents.
+
+BufReader<R> enveloppe un lecteur avec un buffer, rendant read_line() et lines() efficaces. BufWriter<W> groupe les appels d'écriture. Pour les grands fichiers, toujours utiliser les lecteurs bufferisés.
+
+OpenOptions offre un contrôle précis : OpenOptions::new().read(true).write(true).create(true).open(chemin). L'option append(true) ajoute en fin de fichier sans écraser.
+
+Path et PathBuf pour la manipulation des chemins. Path::new(s) crée une référence. path.join(composant) concatène. path.extension() retourne l'extension. path.file_name() retourne le nom de fichier. path.parent() retourne le répertoire parent. path.exists() teste l'existence.
+
+Bibliothèque standard : Chaînes de caractères
+
+String::from("texte"), "texte".to_string(), et format!("...") produisent des String. s.push_str("suite") ajoute &str. s.push('c') ajoute un char. s.contains("sous"), s.starts_with("pré"), s.ends_with("suf") testent les sous-chaînes. s.replace("ancien", "nouveau") retourne une nouvelle String. s.split(',') produit un itérateur de &str. s.trim() supprime les espaces en tête et fin. s.to_uppercase() et s.to_lowercase() retournent de nouvelles Strings.
+
+Conversion numérique : "42".parse::<i32>() retourne Result<i32, ParseIntError>. Le turbofish ou l'annotation de type est nécessaire car parse est générique. Pour formater : format!("{:05}", 42) retourne "00042". format!("{:.3}", 3.14159) retourne "3.142".
+
+Bibliothèque standard : Iterators détaillés
+
+Adaptateurs clés : map(f), filter(p), flat_map(f), take(n), skip(n), take_while(p), skip_while(p), chain(iter), zip(iter), enumerate(), peekable(), rev(). Chaque adaptateur est paresseux : rien n'est calculé tant que l'itérateur n'est pas consommé.
+
+Consommateurs : collect::<Collection>(), sum(), product(), count(), fold(init, f), reduce(f), min(), max(), min_by_key(f), max_by_key(f), find(p), position(p), any(p), all(p), for_each(f), last(), nth(n).
+
+Créer des itérateurs : iter() emprunte, iter_mut() emprunte mutablement, into_iter() consomme. Plages : (0..10), (0..=10). std::iter::once(v) enveloppe une valeur unique. std::iter::repeat(v) répète indéfiniment. std::iter::from_fn(|| ...) génère depuis une closure avec état.
+
+Bibliothèque standard : Synchronisation avancée
+
+Mutex<T> : lock() bloque jusqu'à acquisition. Retourne MutexGuard<T> qui se déréférence en &mut T. Le guard se déverrouille automatiquement au drop. try_lock() retourne Err si verrouillé. Attention : tenir un Mutex sur un point .await bloque le thread entier sur les runtimes multi-thread.
+
+RwLock<T> : read() autorise plusieurs lecteurs simultanés. write() requiert l'accès exclusif. Meilleur que Mutex quand les lectures sont très fréquentes et les écritures rares.
+
+Condvar (variable de condition) : utilisée avec un Mutex pour attendre une condition. wait(guard) relâche atomiquement le mutex et dort. notify_one() ou notify_all() réveille les attendants. Pattern classique producteur-consommateur.
+
+std::sync::atomic : AtomicBool, AtomicUsize, AtomicI32 etc. Opérations : load(Ordering), store(v, Ordering), fetch_add(v, Ordering), compare_exchange(ancien, nouveau, ord_succ, ord_echec). Ordering::SeqCst est le plus sûr, Relaxed le plus rapide mais nécessite un raisonnement soigneux sur l'ordering mémoire.
+

@@ -1,0 +1,671 @@
+Exemples de code Rust
+
+---
+
+Hello World :
+
+fn main() {
+    println!("Bonjour, le monde !");
+}
+
+---
+
+Variables et mutabilité :
+
+fn main() {
+    let x = 5;
+    let mut y = 10;
+    y += 1;
+    println!("x = {x}, y = {y}");
+}
+
+---
+
+Structures et implémentation :
+
+struct Point {
+    x: f64,
+    y: f64,
+}
+
+impl Point {
+    fn new(x: f64, y: f64) -> Self {
+        Point { x, y }
+    }
+
+    fn distance(&self, other: &Point) -> f64 {
+        let dx = self.x - other.x;
+        let dy = self.y - other.y;
+        (dx * dx + dy * dy).sqrt()
+    }
+}
+
+fn main() {
+    let a = Point::new(0.0, 0.0);
+    let b = Point::new(3.0, 4.0);
+    println!("distance = {}", a.distance(&b));
+}
+
+---
+
+Enum et pattern matching :
+
+enum Forme {
+    Cercle(f64),
+    Rectangle(f64, f64),
+    Triangle(f64, f64, f64),
+}
+
+fn aire(f: &Forme) -> f64 {
+    match f {
+        Forme::Cercle(r) => std::f64::consts::PI * r * r,
+        Forme::Rectangle(l, h) => l * h,
+        Forme::Triangle(a, b, c) => {
+            let s = (a + b + c) / 2.0;
+            (s * (s - a) * (s - b) * (s - c)).sqrt()
+        }
+    }
+}
+
+fn main() {
+    let formes = vec![
+        Forme::Cercle(5.0),
+        Forme::Rectangle(4.0, 6.0),
+        Forme::Triangle(3.0, 4.0, 5.0),
+    ];
+    for f in &formes {
+        println!("aire = {:.2}", aire(f));
+    }
+}
+
+---
+
+Option et Result :
+
+fn diviser(a: f64, b: f64) -> Option<f64> {
+    if b == 0.0 { None } else { Some(a / b) }
+}
+
+fn lire_entier(s: &str) -> Result<i32, std::num::ParseIntError> {
+    s.trim().parse()
+}
+
+fn main() {
+    match diviser(10.0, 3.0) {
+        Some(v) => println!("{:.4}", v),
+        None => println!("division par zéro"),
+    }
+
+    match lire_entier("42") {
+        Ok(n) => println!("n = {n}"),
+        Err(e) => println!("erreur : {e}"),
+    }
+}
+
+---
+
+Traits et generics :
+
+trait Surface {
+    fn aire(&self) -> f64;
+    fn perimetre(&self) -> f64;
+}
+
+struct Disque { rayon: f64 }
+struct Carre { cote: f64 }
+
+impl Surface for Disque {
+    fn aire(&self) -> f64 { std::f64::consts::PI * self.rayon * self.rayon }
+    fn perimetre(&self) -> f64 { 2.0 * std::f64::consts::PI * self.rayon }
+}
+
+impl Surface for Carre {
+    fn aire(&self) -> f64 { self.cote * self.cote }
+    fn perimetre(&self) -> f64 { 4.0 * self.cote }
+}
+
+fn afficher(s: &dyn Surface) {
+    println!("aire={:.2} perimetre={:.2}", s.aire(), s.perimetre());
+}
+
+fn main() {
+    let d = Disque { rayon: 3.0 };
+    let c = Carre { cote: 4.0 };
+    afficher(&d);
+    afficher(&c);
+}
+
+---
+
+Closures et itérateurs :
+
+fn main() {
+    let v = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+    let somme_carres_pairs: i32 = v.iter()
+        .filter(|&&x| x % 2 == 0)
+        .map(|&x| x * x)
+        .sum();
+
+    println!("{somme_carres_pairs}");
+
+    let mots = vec!["bonjour", "monde", "rust", "est", "génial"];
+    let longs: Vec<_> = mots.iter()
+        .filter(|m| m.len() > 4)
+        .map(|m| m.to_uppercase())
+        .collect();
+    println!("{longs:?}");
+}
+
+---
+
+Ownership et borrowing :
+
+fn longueur(s: &str) -> usize {
+    s.len()
+}
+
+fn ajouter_suffix(mut s: String, suffix: &str) -> String {
+    s.push_str(suffix);
+    s
+}
+
+fn main() {
+    let texte = String::from("bonjour");
+    println!("{}", longueur(&texte));
+    let texte = ajouter_suffix(texte, " monde");
+    println!("{texte}");
+}
+
+---
+
+Threads et channels :
+
+use std::sync::mpsc;
+use std::thread;
+
+fn main() {
+    let (tx, rx) = mpsc::channel();
+
+    for i in 0..5 {
+        let tx = tx.clone();
+        thread::spawn(move || {
+            tx.send(i * i).unwrap();
+        });
+    }
+    drop(tx);
+
+    let mut resultats: Vec<i32> = rx.iter().collect();
+    resultats.sort();
+    println!("{resultats:?}");
+}
+
+---
+
+Mutex partagé entre threads :
+
+use std::sync::{Arc, Mutex};
+use std::thread;
+
+fn main() {
+    let compteur = Arc::new(Mutex::new(0));
+    let mut handles = Vec::new();
+
+    for _ in 0..8 {
+        let c = Arc::clone(&compteur);
+        handles.push(thread::spawn(move || {
+            *c.lock().unwrap() += 1;
+        }));
+    }
+
+    for h in handles { h.join().unwrap(); }
+    println!("compteur = {}", *compteur.lock().unwrap());
+}
+
+---
+
+Pattern builder :
+
+struct RequeteBuilder {
+    url: String,
+    timeout_ms: u64,
+    retries: u32,
+}
+
+impl RequeteBuilder {
+    fn new(url: &str) -> Self {
+        RequeteBuilder {
+            url: url.to_string(),
+            timeout_ms: 5000,
+            retries: 3,
+        }
+    }
+
+    fn timeout(mut self, ms: u64) -> Self {
+        self.timeout_ms = ms;
+        self
+    }
+
+    fn retries(mut self, n: u32) -> Self {
+        self.retries = n;
+        self
+    }
+
+    fn build(self) -> String {
+        format!("GET {} (timeout={}ms, retries={})", self.url, self.timeout_ms, self.retries)
+    }
+}
+
+fn main() {
+    let r = RequeteBuilder::new("https://api.exemple.fr")
+        .timeout(10_000)
+        .retries(5)
+        .build();
+    println!("{r}");
+}
+
+---
+
+Erreur personnalisée :
+
+use std::fmt;
+
+#[derive(Debug)]
+enum ErreurApp {
+    Io(std::io::Error),
+    Parse(std::num::ParseIntError),
+    Logique(String),
+}
+
+impl fmt::Display for ErreurApp {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Io(e) => write!(f, "IO : {e}"),
+            Self::Parse(e) => write!(f, "parse : {e}"),
+            Self::Logique(s) => write!(f, "logique : {s}"),
+        }
+    }
+}
+
+impl std::error::Error for ErreurApp {}
+
+impl From<std::io::Error> for ErreurApp {
+    fn from(e: std::io::Error) -> Self { Self::Io(e) }
+}
+
+impl From<std::num::ParseIntError> for ErreurApp {
+    fn from(e: std::num::ParseIntError) -> Self { Self::Parse(e) }
+}
+
+fn charger(path: &str) -> Result<i32, ErreurApp> {
+    let s = std::fs::read_to_string(path)?;
+    let n: i32 = s.trim().parse()?;
+    if n < 0 { return Err(ErreurApp::Logique("valeur négative".into())); }
+    Ok(n)
+}
+
+---
+
+Generics avec contraintes multiples :
+
+use std::fmt::{Display, Debug};
+
+fn afficher_et_comparer<T>(a: T, b: T) -> T
+where
+    T: PartialOrd + Display + Debug + Clone,
+{
+    println!("a={a}, b={b}");
+    if a > b { a } else { b }
+}
+
+fn main() {
+    let max = afficher_et_comparer(3.14f64, 2.71);
+    println!("max = {max}");
+}
+
+---
+
+Lifetime dans une struct :
+
+struct Analyseur<'a> {
+    source: &'a str,
+    position: usize,
+}
+
+impl<'a> Analyseur<'a> {
+    fn new(source: &'a str) -> Self {
+        Analyseur { source, position: 0 }
+    }
+
+    fn token_suivant(&mut self) -> Option<&'a str> {
+        let debut = self.source[self.position..]
+            .find(|c: char| !c.is_whitespace())
+            .map(|i| self.position + i)?;
+        let fin = self.source[debut..]
+            .find(|c: char| c.is_whitespace())
+            .map(|i| debut + i)
+            .unwrap_or(self.source.len());
+        self.position = fin;
+        Some(&self.source[debut..fin])
+    }
+}
+
+fn main() {
+    let mut a = Analyseur::new("bonjour monde rust");
+    while let Some(tok) = a.token_suivant() {
+        println!("{tok}");
+    }
+}
+
+---
+
+Comptage de mots avec HashMap :
+
+use std::collections::HashMap;
+
+fn compter_mots(texte: &str) -> HashMap<&str, usize> {
+    let mut compteur = HashMap::new();
+    for mot in texte.split_whitespace() {
+        *compteur.entry(mot).or_insert(0) += 1;
+    }
+    compteur
+}
+
+fn main() {
+    let texte = "le rust est rapide le rust est sûr rust rust";
+    let mut freq: Vec<_> = compter_mots(texte).into_iter().collect();
+    freq.sort_by(|a, b| b.1.cmp(&a.1));
+    for (mot, n) in &freq {
+        println!("{mot}: {n}");
+    }
+}
+
+---
+
+Lecture fichier ligne par ligne :
+
+use std::fs::File;
+use std::io::{BufRead, BufReader};
+
+fn main() -> std::io::Result<()> {
+    let fichier = File::open("donnees.txt")?;
+    let lecteur = BufReader::new(fichier);
+    let mut somme = 0i64;
+    let mut lignes = 0;
+
+    for ligne in lecteur.lines() {
+        let l = ligne?;
+        if let Ok(n) = l.trim().parse::<i64>() {
+            somme += n;
+            lignes += 1;
+        }
+    }
+    println!("{lignes} valeurs, somme = {somme}");
+    Ok(())
+}
+
+---
+
+Newtype pattern :
+
+struct UserId(u64);
+struct ProduitId(u64);
+
+fn commande(user: UserId, produit: ProduitId) {
+    println!("utilisateur {} commande produit {}", user.0, produit.0);
+}
+
+fn main() {
+    let u = UserId(42);
+    let p = ProduitId(99);
+    commande(u, p);
+}
+
+---
+
+State machine par types :
+
+struct Attente;
+struct EnCours { tache: String }
+struct Termine { resultat: String }
+
+impl Attente {
+    fn demarrer(self, tache: &str) -> EnCours {
+        EnCours { tache: tache.to_string() }
+    }
+}
+
+impl EnCours {
+    fn terminer(self, res: &str) -> Termine {
+        Termine { resultat: res.to_string() }
+    }
+}
+
+fn main() {
+    let etat = Attente;
+    let etat = etat.demarrer("compilation");
+    let etat = etat.terminer("succès");
+    println!("{}", etat.resultat);
+}
+
+---
+
+Tests unitaires :
+
+pub fn factorielle(n: u64) -> u64 {
+    (1..=n).product()
+}
+
+pub fn fibonacci(n: u32) -> u64 {
+    match n {
+        0 => 0,
+        1 => 1,
+        _ => {
+            let (mut a, mut b) = (0u64, 1u64);
+            for _ in 2..=n { let c = a + b; a = b; b = c; }
+            b
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_fact() {
+        assert_eq!(factorielle(0), 1);
+        assert_eq!(factorielle(5), 120);
+        assert_eq!(factorielle(10), 3_628_800);
+    }
+
+    #[test]
+    fn test_fib() {
+        assert_eq!(fibonacci(0), 0);
+        assert_eq!(fibonacci(1), 1);
+        assert_eq!(fibonacci(10), 55);
+    }
+}
+
+---
+
+Opérateurs surchargés :
+
+use std::ops::{Add, Mul, Neg};
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+struct Vec2 { x: f64, y: f64 }
+
+impl Vec2 {
+    fn new(x: f64, y: f64) -> Self { Vec2 { x, y } }
+    fn norme(&self) -> f64 { (self.x * self.x + self.y * self.y).sqrt() }
+    fn dot(&self, o: Vec2) -> f64 { self.x * o.x + self.y * o.y }
+}
+
+impl Add for Vec2 {
+    type Output = Vec2;
+    fn add(self, o: Vec2) -> Vec2 { Vec2::new(self.x + o.x, self.y + o.y) }
+}
+
+impl Neg for Vec2 {
+    type Output = Vec2;
+    fn neg(self) -> Vec2 { Vec2::new(-self.x, -self.y) }
+}
+
+impl Mul<f64> for Vec2 {
+    type Output = Vec2;
+    fn mul(self, s: f64) -> Vec2 { Vec2::new(self.x * s, self.y * s) }
+}
+
+fn main() {
+    let a = Vec2::new(1.0, 2.0);
+    let b = Vec2::new(3.0, 4.0);
+    println!("{:?}", a + b);
+    println!("norme b = {:.4}", b.norme());
+    println!("dot = {}", a.dot(b));
+}
+
+---
+
+Itérateur personnalisé :
+
+struct SuiteGeometrique {
+    valeur: f64,
+    raison: f64,
+}
+
+impl SuiteGeometrique {
+    fn new(debut: f64, raison: f64) -> Self {
+        SuiteGeometrique { valeur: debut, raison }
+    }
+}
+
+impl Iterator for SuiteGeometrique {
+    type Item = f64;
+
+    fn next(&mut self) -> Option<f64> {
+        let v = self.valeur;
+        self.valeur *= self.raison;
+        Some(v)
+    }
+}
+
+fn main() {
+    let premiers: Vec<f64> = SuiteGeometrique::new(1.0, 2.0).take(8).collect();
+    println!("{premiers:?}");
+}
+
+---
+
+Atomics sans mutex :
+
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::Arc;
+use std::thread;
+
+fn main() {
+    let compteur = Arc::new(AtomicU64::new(0));
+    let mut handles = Vec::new();
+
+    for _ in 0..8 {
+        let c = Arc::clone(&compteur);
+        handles.push(thread::spawn(move || {
+            for _ in 0..1000 {
+                c.fetch_add(1, Ordering::Relaxed);
+            }
+        }));
+    }
+
+    for h in handles { h.join().unwrap(); }
+    println!("total = {}", compteur.load(Ordering::Relaxed));
+}
+
+---
+
+Tri personnalisé :
+
+#[derive(Debug)]
+struct Etudiant {
+    nom: String,
+    note: f64,
+}
+
+fn main() {
+    let mut etudiants = vec![
+        Etudiant { nom: "Alice".into(), note: 17.5 },
+        Etudiant { nom: "Bob".into(), note: 14.0 },
+        Etudiant { nom: "Charlie".into(), note: 19.0 },
+        Etudiant { nom: "Diana".into(), note: 14.0 },
+    ];
+
+    etudiants.sort_by(|a, b| {
+        b.note.partial_cmp(&a.note).unwrap()
+            .then(a.nom.cmp(&b.nom))
+    });
+
+    for e in &etudiants {
+        println!("{}: {}", e.nom, e.note);
+    }
+}
+
+---
+
+Macro déclarative :
+
+macro_rules! assert_dans {
+    ($val:expr, $min:expr, $max:expr) => {
+        assert!(
+            $val >= $min && $val <= $max,
+            "{} n'est pas dans [{}, {}]",
+            $val, $min, $max
+        );
+    };
+}
+
+macro_rules! log_info {
+    ($($arg:tt)*) => {
+        println!("[INFO] {}", format!($($arg)*));
+    };
+}
+
+fn main() {
+    assert_dans!(5, 1, 10);
+    log_info!("serveur démarré sur le port {}", 8080);
+}
+
+---
+
+Cow pour éviter les allocations :
+
+use std::borrow::Cow;
+
+fn nettoyer(s: &str) -> Cow<str> {
+    if s.chars().all(|c| c.is_ascii() && !c.is_control()) {
+        Cow::Borrowed(s)
+    } else {
+        Cow::Owned(s.chars().filter(|c| c.is_ascii() && !c.is_control()).collect())
+    }
+}
+
+fn main() {
+    let propre = nettoyer("bonjour monde");
+    let sale = nettoyer("bonjour\x00monde\x1b");
+    println!("{propre}");
+    println!("{sale}");
+}
+
+---
+
+Scoped threads :
+
+fn main() {
+    let donnees = vec![1i64, 2, 3, 4, 5, 6, 7, 8];
+    let milieu = donnees.len() / 2;
+    let (gauche, droite) = donnees.split_at(milieu);
+
+    std::thread::scope(|s| {
+        let h1 = s.spawn(|| gauche.iter().sum::<i64>());
+        let h2 = s.spawn(|| droite.iter().sum::<i64>());
+        println!("somme = {}", h1.join().unwrap() + h2.join().unwrap());
+    });
+}

@@ -1,0 +1,112 @@
+Rust pour le calcul scientifique et la programmation systèmes
+
+Algèbre linéaire et tableaux multidimensionnels. Le crate ndarray fournit une structure analogue à NumPy avec layouts row-major et column-major, vues sans copie, broadcasting, slicing. Les performances reposent sur BLAS via le crate ndarray-linalg, permettant de bénéficier d'OpenBLAS, MKL ou Accelerate selon la plateforme. Pour les calculs symboliques ou les grandes matrices creuses, nalgebra et sprs couvrent les besoins spécifiques.
+
+Calcul tensoriel et apprentissage profond. Burn propose un framework deep learning entièrement en Rust, multi-backend (CPU, CUDA, WGPU, Metal). Candle, développé par Hugging Face, vise l'inférence efficace de modèles transformers avec une API minimale. Les modèles open-source de la collection Hugging Face s'exécutent nativement, sans dépendance Python à l'exécution.
+
+Calcul parallèle. Le crate rayon transforme un iter en par_iter avec un work-stealing scheduler optimal. Sur une machine multi-cœur, un .par_iter().map(...).sum() exploite tous les CPU sans configuration. Le crate crossbeam fournit des primitives de plus bas niveau pour des patterns avancés : scoped threads, channels MPMC, queues lock-free.
+
+Calcul distribué. Pour le calcul HPC, MPI bindings via rsmpi permettent l'écriture de simulations parallèles sur clusters. Apache Arrow Flight via arrow-rs facilite le transfert de données tabulaires. Pour les workloads distribués modernes, les bindings Ray, Dask sont moins matures qu'en Python mais des alternatives natives émergent.
+
+Précision numérique. Les types f32 et f64 suivent IEEE 754 strictement. Pour la précision arbitraire, num-bigint, num-rational, num-complex couvrent les besoins en mathématiques exactes. rug fournit des bindings GMP/MPFR pour les calculs ultra-précis. Pour les fractions exactes, fraction expose une API ergonomique.
+
+Probabilités et statistiques. statrs implémente les distributions classiques (Normal, Gamma, Beta, Binomial, Poisson) avec PDF, CDF, sampling. rand_distr étend rand avec des distributions plus exotiques. probability fournit une approche alternative orientée modèles génératifs.
+
+Simulation Monte-Carlo. Le pattern canonique combine rayon pour la parallélisation, rand pour la génération de nombres pseudo-aléatoires, et statrs pour les distributions. Une simulation Monte-Carlo simple s'écrit (0..n_samples).into_par_iter().map(|_| sample_one()).sum::<f64>() / n_samples as f64, exploitant tous les cœurs sans effort de coordination.
+
+Optimisation et algèbre. argmin propose un framework d'optimisation numérique pour les problèmes non-linéaires : gradient descent, BFGS, Newton-Raphson, simulated annealing, particle swarm. nalgebra et faer fournissent les briques de base pour les décompositions matricielles (LU, QR, SVD, Cholesky).
+
+Physique computationnelle. Le langage est utilisé dans plusieurs codes de simulation académique : dynamique moléculaire (lumol), fluides (Rust-CFD experiments), particules (rspot). La performance proche du C++, combinée à la sécurité mémoire, attire les chercheurs souhaitant éviter les segfaults pendant les nuits de calcul.
+
+Bioinformatique. rust-bio rassemble les algorithmes classiques : alignement, FASTA parsing, BAM/SAM, FM-index, suffix array. Le projet noodles propose une suite plus moderne, async-friendly. Pour les pipelines de génomique, Nextflow et Snakemake peuvent appeler des binaires Rust pour les étapes performance-critiques.
+
+Cryptographie scientifique. Au-delà des primitives RustCrypto, les crates curve25519-dalek, ed25519-dalek, bls12_381, halo2 supportent les protocoles cryptographiques avancés (zero-knowledge proofs, signatures BLS, courbes elliptiques pairing-friendly). Le projet Aleo, ZCash, Polygon Plonky construisent leurs ZK systems en Rust pur.
+
+Géospatial. geo fournit les types fondamentaux (Point, LineString, Polygon) avec opérations géométriques. geozero permet le streaming entre formats (GeoJSON, WKB, WKT, FlatGeobuf). Les bindings GDAL via gdal permettent l'accès aux formats raster classiques. Pour les calculs sur tuiles, h3o implémente la grille hexagonale H3 d'Uber.
+
+Traitement d'images. image gère le decoding et encoding des formats courants (PNG, JPEG, GIF, BMP, TIFF). imageproc ajoute filtrage, détection de contours, transformations géométriques. Pour la vision par ordinateur avancée, opencv-rust fournit les bindings OpenCV, et candle peut exécuter des modèles de vision pré-entraînés.
+
+Traitement audio. cpal accède aux périphériques audio cross-platform avec une API uniforme. rodio simplifie le playback. rustfft implémente FFT efficaces. symphonia décode la plupart des formats audio (MP3, FLAC, Vorbis, AAC). hound gère le WAV avec une API minimale.
+
+Traitement du signal. Au-delà de rustfft, sci-rs et linfa offrent des briques classiques de DSP et de machine learning statistique. Les filtres IIR/FIR, convolutions, fenêtrages spectraux sont disponibles dans biquad et dsp-rs. Pour les workflows complexes, l'intégration avec NumPy via PyO3 et numpy-rs permet d'exporter des résultats vers les outils Python.
+
+Modélisation et solveurs. good_lp expose une interface uniforme à plusieurs solveurs linéaires (CBC, HiGHS, Gurobi, lp_solve). russcip wrappe SCIP pour la programmation entière mixte. Pour les contraintes booléennes et SAT, splr et varisat permettent l'expérimentation académique. Z3 reste accessible via les bindings z3.rs pour la SMT.
+
+Programmation systèmes bas niveau. Rust accède à toutes les APIs OS via libc, nix (Unix), windows-rs (Windows). io_uring est exposé par tokio-uring, io-uring, rio. epoll, kqueue, IOCP sont abstraits par mio. Les opérations atomiques, barrières mémoire, instructions vectorielles SSE/AVX sont accessibles via std::arch et le crate packed_simd.
+
+Drivers et firmware. Le crate embedded-hal définit un HAL standard adopté par les BSP STM32, ESP32, RP2040, AVR. Les drivers de capteurs et actionneurs réutilisables forment un écosystème en croissance rapide. Embassy fournit un runtime async no_std permettant d'écrire des firmwares idiomatiques sans risquer le blocking call sur un microcontrôleur.
+
+Performance et profiling. cargo flamegraph génère des flamegraphs via perf. samply offre une alternative cross-platform avec visualisation dans le profiler Firefox. criterion fournit un harness de benchmark statistiquement rigoureux. tracing-flame visualise les spans tracing en flamegraph hiérarchique. Les outils Intel VTune et AMD uProf reconnaissent les binaires Rust.
+
+Programmation lock-free. crossbeam-deque, crossbeam-queue, dashmap fournissent des structures concurrentes sans verrou. atomic_ref permet de stocker des références atomiquement. ArcSwap optimise le pattern "lecture fréquente, swap atomique du contenu". Le crate seqlock implémente le pattern lecteur sans copie, écrivain rare.
+
+Embedded et temps-réel. Pour les systèmes contraints, des allocateurs sans heap comme heapless::Vec, heapless::String fournissent des collections à taille fixe sur la stack. Le crate fixed propose des arithmétiques en virgule fixe. Les analyseurs statiques comme miri détectent les UB. Les frameworks RTIC et embassy structurent les applications temps-réel.
+
+Tests de propriété. proptest et quickcheck génèrent des inputs aléatoires pour découvrir les edge cases. Particulièrement utiles pour les parsers, sérialisateurs, calculs numériques. La technique shrinking simplifie automatiquement un input qui casse jusqu'à atteindre un contre-exemple minimal.
+
+Vérification formelle. Le projet Kani de l'AWS applique le model checking borné sur du code Rust pour prouver l'absence d'UB et de panic. Prusti annote les fonctions avec des contrats vérifiés par Viper. Creusot connecte Rust à des assistants de preuve Coq/Why3. Ces outils restent recherche mais progressent rapidement.
+
+Réseaux de neurones from scratch. La création d'une bibliothèque NN minimale en Rust pur (sans BLAS) reste un excellent exercice pédagogique. Les opérations clés à implémenter : forward pass MLP, backprop, SGD, mini-batch. Avec les optimisations vectorisation manuelle et parallelisation rayon, les performances atteignent rapidement quelques GFLOPS sur du CPU desktop.
+
+Génération de nombres pseudo-aléatoires. rand est le standard de facto, exposant des PRNG variés : Xoshiro pour la vitesse, ChaCha pour la qualité cryptographique, PCG pour le compromis. fastrand offre une alternative plus simple. Pour les besoins HPC, getrandom accède aux sources d'entropie OS de manière portable.
+
+Profilage mémoire. dhat fournit l'équivalent du heap profiler Valgrind. memory-stats interroge l'OS pour le RSS. jemallocator remplace l'allocateur système par jemalloc, avec des outils de profilage intégrés. mimalloc et snmalloc sont des alternatives modernes potentiellement plus performantes selon le workload.
+
+GPU computing. wgpu fournit l'accès aux GPU via une API unifiée Vulkan/Metal/DirectX 12/WebGPU. Pour le compute pur, les shaders WGSL ou SPIRV peuvent être lancés directement. cust offre des bindings CUDA. ROCm via rust-amdgpu reste expérimental. Burn exploite ces backends pour exécuter ses tenseurs sur GPU.
+
+Numerical stability. Les fonctions transcendantes std::f64 utilisent les implémentations libm garanties par IEEE 754. Pour les opérations numériquement instables (sommation de petits nombres), kahan_sum dans accurate améliore la précision. Les expansions Taylor ou les schémas dédiés (Welford pour la variance, Neumaier sum) sont disponibles via libnoise ou implementations dédiées.
+
+Visualisation scientifique. plotters génère des graphiques statiques (PNG, SVG, BMP) avec une API ergonomique. plotly via plotly-rs exporte vers Plotly.js pour le HTML interactif. egui_plot fournit des charts intégrés aux UI immédiates. Pour l'exploration interactive, des frontends web via WebAssembly se développent.
+
+Machine learning en Rust pur. Le framework burn fournit le deep learning entièrement en Rust avec plusieurs backends : NdArray pour le CPU, Wgpu pour le GPU via WebGPU, et Candle pour l'inférence légère. Les modèles sont définis avec un système de modules inspiré de PyTorch. La différentiation automatique est intégrée. Le déploiement produit un binaire statiquement lié sans dépendance Python.
+
+Candle de HuggingFace. Framework ML minimaliste supportant les backends CUDA et Metal. Permet d'exécuter les modèles populaires : LLaMA, Whisper, BERT, StableDiffusion. Conçu pour l'inférence plutôt que l'entraînement. S'intègre avec le hub de modèles HuggingFace via des API téléchargement.
+
+Linfa. Équivalent Rust de scikit-learn. Algorithmes : k-means, DBSCAN, régression linéaire et logistique, SVM, arbres de décision, Naïve Bayes, k-plus-proches-voisins. API cohérente entre tous les algorithmes via des traits génériques. Fonctionne sur les datasets ndarray.
+
+Calcul numérique fondamental. ndarray offre des tableaux N-dimensionnels avec broadcasting, slicing et opérations élément par élément selon les conventions NumPy. Les bindings blas-lapack-rs accèdent aux routines BLAS optimisées pour la multiplication matricielle et les systèmes linéaires.
+
+nalgebra. Bibliothèque d'algèbre linéaire avec garanties au niveau des types. Les dimensions peuvent être statiquement connues : Matrix3<f64> est une matrice 3×3 à la compilation, activant des vérifications dimensionnelles sans coût. Utilisée en robotique et en infographie. Décompositions disponibles : LU, QR, SVD, Cholesky, valeurs propres.
+
+Physique computationnelle. Rust est utilisé dans des codes de simulation académique : dynamique moléculaire avec lumol, simulations de fluides avec rust-cfd. La performance proche du C++, combinée à la sécurité mémoire, attire les chercheurs voulant éviter les segfaults pendant les nuits de calcul.
+
+Bioinformatique. rust-bio implémente les algorithmes classiques : alignement Smith-Waterman, BLAST-like, FM-index, suffix array. noodles propose une suite plus moderne pour les formats BAM/SAM, FASTA, VCF avec support async. Pour les pipelines génomiques, Nextflow et Snakemake appellent des binaires Rust pour les étapes critiques en performance.
+
+Cryptographie scientifique. Les crates curve25519-dalek, ed25519-dalek, bls12_381, halo2 supportent les protocoles cryptographiques avancés : zero-knowledge proofs, signatures BLS, courbes elliptiques pairing-friendly. Le projet ZCash, Polygon Plonky et d'autres systèmes ZK construisent leurs protocoles en Rust pur.
+
+Géospatial. geo fournit les types fondamentaux (Point, LineString, Polygon) avec opérations géométriques. geozero permet le streaming entre formats (GeoJSON, WKB, WKT, FlatGeobuf). h3o implémente la grille hexagonale H3 d'Uber pour les calculs géospatiaux discrétisés.
+
+Traitement du signal. rustfft implémente des FFT efficaces en pur Rust. Les filtres IIR/FIR, convolutions, fenêtrages spectraux sont disponibles via biquad. Pour les workflows complexes, l'intégration avec NumPy via PyO3 permet d'exporter les résultats vers les outils Python existants.
+
+Modélisation et optimisation. good_lp expose une interface unifiée à plusieurs solveurs linéaires (CBC, HiGHS, Gurobi). Pour les contraintes SAT, splr et varisat permettent l'expérimentation. Z3 reste accessible via les bindings z3.rs pour la SMT (Satisfiability Modulo Theories).
+
+Tests de propriété. proptest et quickcheck génèrent des inputs aléatoires pour découvrir les edge cases. Particulièrement utiles pour les parsers, sérialisateurs, calculs numériques. La technique de shrinking simplifie automatiquement un input qui casse jusqu'à atteindre un contre-exemple minimal.
+
+Statistiques et probabilités. La crate statrs implémente les distributions continues (Normale, Log-Normale, Beta, Gamma, Exponentielle, Student-t, Weibull) et discrètes (Binomiale, Poisson, Géométrique, Hypergéométrique). Chaque distribution fournit PDF/PMF, CDF, quantile, moments et échantillonnage aléatoire.
+
+Performance et profilage. cargo flamegraph génère des flamegraphs via perf. samply offre une alternative cross-platform avec visualisation dans Firefox Profiler. criterion fournit un harness de benchmark statistiquement rigoureux avec détection des régressions. Les outils Intel VTune et AMD uProf reconnaissent les binaires Rust.
+
+Simulation physique. rapier est un moteur de physique rigid-body 2D et 3D en pur Rust. Utilisé par le moteur de jeu Bevy et plusieurs simulateurs robotiques. Fournit la détection de collision, la dynamique des corps rigides, les articulations et les contraintes. nalgebra est la bibliothèque d'algèbre linéaire sous-jacente, fournissant matrices, vecteurs et transformations géométriques.
+
+Chimie computationnelle. chemrust et mol-rs permettent la représentation de molécules, la manipulation de structures chimiques et les calculs de propriétés. Les interfaces vers des outils de chimie quantique (ORCA, Gaussian) via des bindings Rust émergent dans les groupes de recherche académiques. La bibliothèque rdkit-rs enveloppe le toolkit RDKit pour la chimioinformatique.
+
+Bioinformatique avancée. Rust est fortement présent dans les pipelines bioinformatiques. noodles gère les formats courants : BAM, SAM, CRAM, VCF, BCF, FASTQ, FASTA. needletail traite les fichiers FASTA/FASTQ à grande vitesse. polars est utilisé pour l'analyse de données génomiques tabulaires. Le projet Rust-bio fournit des algorithmes fondamentaux : alignement, structures de données de séquences, indexes.
+
+Astronomie et astrophysique. astropy-rust et les bindings FITS permettent le traitement de données astronomiques. Le format FITS, standard de l'astronomie, est géré par des crates dédiées. Les simulations N-corps utilisent Rust pour les noyaux de calcul de force gravitationnelle, profitant de la vectorisation automatique et du parallélisme via rayon.
+
+Apprentissage automatique natif. La crate linfa fournit des algorithmes ML classiques sans deep learning : régression linéaire et logistique, k-means, SVM, PCA, arbres de décision. Tout en pur Rust sans dépendance sur Python ou BLAS. burn est un framework de deep learning multi-backend (WGPU pour GPU, ndarray pour CPU, Candle pour l'inférence). candle de Hugging Face cible l'inférence de LLM en pur Rust.
+
+Vision par ordinateur. image est la crate standard pour le décodage et traitement d'images (JPEG, PNG, WebP, BMP, TIFF). imageproc fournit les algorithmes de vision : détection de contours, transformations géométriques, filtres morphologiques. Pour les pipelines industriels, les bindings OpenCV via opencv-rust donnent accès à l'écosystème mature de la bibliothèque.
+
+Traitement du langage naturel. Les tokenizers de Hugging Face sont implémentés en Rust et exposés via Python. rust-tokenizers implémente des algorithmes BPE, WordPiece, SentencePiece. Les embeddings vectoriels et la recherche de similarité sont supportés par hnswlib-rs (algorithme HNSW) pour la recherche approximate nearest neighbor dans des espaces haute dimension.
+
+Calcul haute performance. Des projets HPC utilisent Rust pour les kernels de calcul. Les bindings MPI permettent du calcul distribué sur des clusters. Les interfaces CUDA et ROCm via des crates comme cust et hip-rs permettent le GPU computing. Rust est utilisé dans des projets de simulation pour la climatologie et la dynamique des fluides grâce à ses performances proches du C++ sans comportement indéfini.
+
+Analyse de données structurées. polars est le DataFrame Rust de référence. Sa conception orientée colonnes, l'évaluation paresseuse, et le moteur d'exécution multi-thread le rendent systématiquement plus rapide que pandas. Les requêtes SQL sont supportées via DuckDB-rs, qui enveloppe le moteur analytique DuckDB et permet d'exécuter du SQL analytique directement sur des DataFrames ou fichiers Parquet.
+
+Mathématiques symboliques. symbolic-math et symengine-rs visent la manipulation symbolique d'expressions mathématiques en Rust. Les algorithmes de simplification, dérivation symbolique et intégration formelle restent un domaine en développement dans l'écosystème. Pour les besoins courants de différentiation automatique, rust-ad et ad fournissent la différentiation forward et reverse mode pour l'optimisation de fonctions.
+
+Modélisation financière. La quantification du risque et la valorisation d'instruments financiers bénéficient des performances Rust. Des librairies de pricing d'options (Black-Scholes, arbres binomiaux, Monte Carlo) existent. La précision numérique et l'absence de GC pauses sont des atouts critiques pour les systèmes de trading haute fréquence.
+
+Infrastructure de recherche. Rust est adopté dans l'infrastructure des laboratoires de recherche : parsers de formats de données scientifiques, pipelines de traitement en batch, serveurs de calcul distribués. Les librairies Rust peuvent être appelées depuis Python via PyO3, R via extendr, et Julia via des appels FFI, ce qui permet l'intégration progressive dans les workflows scientifiques existants.
+

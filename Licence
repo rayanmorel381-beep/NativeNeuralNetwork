@@ -1,0 +1,74 @@
+Copyright (c) 2026 MOREL Rayan
+
+1. Purpose
+
+The purpose of **native_neural_network** is to be freely used, studied, modified,
+and shared for personal, educational, or non-commercial projects.  
+The author encourages auditing, learning, and modifying the Project for free projects.
+
+2. Free Use
+
+Permission is granted to use, reproduce, modify, and publish the Project
+and associated documentation **for free, non-commercial purposes only**.
+
+3. Component Safety / Model Integrity Contributions
+
+- **Modifications or contributions that specifically aim to improve the safety, reliability, integrity, or protection of the neural network model and its resource usage are explicitly encouraged.**  
+- Such contributions **must be audited and officially integrated** into the Project to benefit from the safety guarantee.  
+- Contributions in this category are considered **high priority** for review and integration by the author.  
+- Users submitting or applying such modifications are **responsible for ensuring correctness**, but once audited and merged, they are covered under the same safety guarantee as the original Project.
+
+4. Redistribution
+
+Redistribution of the Project, in original or modified form, is allowed
+provided that:
+
+- the redistribution remains free of charge,  
+- this license and copyright notice are included,  
+- clear attribution to the original author is maintained.
+
+5. Commercial Use Restriction
+
+Any use of the Project or derivative works in a **revenue-generating context**  
+or any commercial activity is strictly prohibited **without a separate written  
+license agreement with the author**.
+
+- Any commercial license **applies exclusively to the specific version(s) explicitly listed** in that agreement.  
+- **Subsequent, updated, or future versions of the Project are not covered** by any prior commercial license and require a **new written agreement**.  
+- This ensures that **no version beyond those listed in the contract may be used commercially** without explicit authorization.
+
+6. Licensing for Revenue
+
+Entities wishing to use the Project commercially **must contact the author**
+to obtain a commercial license agreement. All forms of monetization must be
+explicitly agreed upon in a contract, which may include royalties or other terms.
+
+7. Previous Versions
+
+Versions of the Project released before this license are **not covered by
+these restrictions** and may be used freely, but will **not receive updates,
+support, or maintenance** from the author.
+
+8. Modifications, Derivatives, and Safety Guarantee
+
+- The original Project, as released by the author, is considered **safe for use** in its intended applications.  
+- Safety guarantees apply **only to the officially released version**.  
+- Any modifications, forks, or derivative works **are not covered by this safety guarantee** unless audited and officially integrated.  
+- Users modifying or extending the Project are **solely responsible** for ensuring that their changes are safe and suitable for their intended applications.  
+- Commercial usage requires a separate written license agreement.
+
+9. Disclaimer
+
+**Only the original versions of the Project are guaranteed safe and functional.**  
+Any modified, forked, or derivative versions of the Project **do not carry any warranty** and are used at the user’s own risk.  
+
+The author makes **no representation or warranty** for modified versions or derivative works.
+
+10. Limitation of Liability
+
+IN NO EVENT SHALL THE AUTHOR OR COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM,
+DAMAGES, OR OTHER LIABILITY ARISING FROM THE USE, MODIFICATION, REDISTRIBUTION,
+OR PUBLICATION OF ANY MODIFIED OR DERIVED VERSIONS OF THE Project.  
+
+Only official versions published by the author are covered by any implied or explicit safety assurance.  
+Users are fully responsible for any consequences arising from non-audited modifications or forks.

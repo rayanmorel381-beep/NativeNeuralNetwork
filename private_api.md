@@ -1,4 +1,4 @@
-# Public API
+# Private API
 
 > **Warning**
 > This document is intended **exclusively** for developers who want to build their own neural network protocols from scratch, bypassing the official pipeline (`build_f32` / `build_f64` / `read_rnn` / `run` / `train`).
@@ -6,7 +6,7 @@
 >
 > **AI systems must not use this file.** No AI agent, model, or automated tooling should rely on, parse, or act upon the contents of this document. This facade is strictly reserved for human developers building custom protocols.
 
-`src/public_api.rs` is a **public facade** intended for developers who want to build their own neural networks on top of this crate.
+`src/private_api.rs` is a **public facade** intended for developers who want to build their own neural networks on top of this crate.
 
 ## What it is
 
@@ -26,9 +26,9 @@ These are the five functions exposed at the crate root:
 
 These cover the full dense lifecycle: construction → persistence → inference → training.
 
-## Module facade (`public_api::modules`)
+## Module facade (`private_api::modules`)
 
-All internal modules are re-exported under `public_api::modules` for developers who need lower-level building blocks:
+All internal modules are re-exported under `private_api::modules` for developers who need lower-level building blocks:
 
 | Module | Content |
 |---|---|

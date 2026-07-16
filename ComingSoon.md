@@ -79,6 +79,6 @@ Alongside this, the onboarding rollout (server setup and model packs) will be do
 
 ## Documentation and Support
 
-Alongside the release, we will publish step-by-step setup and usage documentation, including examples.
+Alongside the release, I will publish step-by-step setup and usage documentation, including examples.
 
 My intent is to make the path from "first clone" to "first useful result" much shorter and more reliable for everyone.

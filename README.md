@@ -11,7 +11,7 @@
 >
 > **Production use:** if you intend to use this project in a production environment, please contact the maintainers **before deployment** through one of the communication channels listed in [Contributing](#contributing).
 >
-> This is especially important for production deployments that depend on the public API, FFI ABI, model formats, or the `Native_Neural_Network_std` wrapper. We can provide guidance regarding the current state of the project and compatibility expectations.
+> This is especially important for production deployments that depend on the public API, FFI ABI, model formats, or the `Native_Neural_Network` wrapper. We can provide guidance regarding the current state of the project and compatibility expectations.
 
 
 **Clippy status**: This crate is, as of today, 100% clippy-safe — no active `clippy` warnings.

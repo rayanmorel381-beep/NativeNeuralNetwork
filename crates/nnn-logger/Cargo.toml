@@ -1,0 +1,17 @@
+[package]
+name = "nnn-logger"
+version = "0.4.0"
+edition = "2021"
+authors = ["RAYAN"]
+description = "Logging primitives for Native Neural Network"
+license = "MIT"
+
+[lib]
+name = "nnn_logger"
+path = "src/lib.rs"
+crate-type = ["rlib"]
+
+[dependencies]
+
+[features]
+default = []

@@ -1,0 +1,16 @@
+[package]
+name = "nnn-parser"
+version = "0.4.0"
+edition = "2024"
+authors = ["RAYAN"]
+description = "Parsing utilities for Native Neural Network"
+license = "MIT"
+
+[lib]
+name = "nnn_parser"
+path = "src/lib.rs"
+crate-type = ["rlib"]
+
+[dependencies]
+nnn-hal = { path = "../nnn-hal" }
+nnn-bmk = { path = "../nnn-bmk" }

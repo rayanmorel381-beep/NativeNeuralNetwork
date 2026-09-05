@@ -1,8 +1,18 @@
-# rnn
+# RNN
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 ![Platform: Linux%20%7C%20macOS%20%7C%20Windows](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-blue)
 ![Rust: stable](https://img.shields.io/badge/Rust-stable-orange)
+
+> [!WARNING]
+> **Project under restructuring**
+>
+> This project is currently undergoing an active restructuring phase. Internal modules, APIs, formats, wrappers, and project organization may change during this process.
+>
+> **Production use:** if you intend to use this project in a production environment, please contact the maintainers **before deployment** through one of the communication channels listed in [Contributing](#contributing).
+>
+> This is especially important for production deployments that depend on the public API, FFI ABI, model formats, or the `Native_Neural_Network_std` wrapper. We can provide guidance regarding the current state of the project and compatibility expectations.
+
 
 **Clippy status**: This crate is, as of today, 100% clippy-safe — no active `clippy` warnings.
 

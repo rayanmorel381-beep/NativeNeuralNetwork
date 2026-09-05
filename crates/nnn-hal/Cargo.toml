@@ -1,0 +1,19 @@
+[package]
+name = "nnn-hal"
+version = "0.4.0"
+edition = "2021"
+authors = ["RAYAN"]
+description = "Hardware abstraction layer for Native Neural Network"
+license = "MIT"
+repository = "https://github.com/rayanmorel381-beep/NativeNeuralNetwork"
+
+[lib]
+name = "nnn_hal"
+path = "src/lib.rs"
+crate-type = ["rlib"]
+
+[dependencies]
+nnn-config = { path = "../nnn-config" }
+
+[features]
+default = []

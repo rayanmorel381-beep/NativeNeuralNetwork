@@ -1,4 +1,4 @@
-# RNN
+# Rust Neural Network
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 ![Platform: Linux%20%7C%20macOS%20%7C%20Windows](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-blue)

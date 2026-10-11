@@ -1,0 +1,12 @@
+[package]
+name = "nnn-base"
+version = "0.4.0"
+edition = "2021"
+authors = ["RAYAN"]
+description = "Core numerical, tensor, activation, initializer, and scratch primitives"
+license = "MIT"
+
+[lib]
+name = "nnn_base"
+path = "src/lib.rs"
+crate-type = ["rlib"]
